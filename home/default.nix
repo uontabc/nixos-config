@@ -42,7 +42,10 @@ in
   hjem.users.${identity.username} = {
     enable = true;
     # Manage individual files so plugin state and locks remain writable.
-    files.".zshrc".source = ./zsh/interactive.zsh;
+    files.".zshrc".source = pkgs.replaceVars ./zsh/interactive.zsh {
+      history_guard = "${pkgs.python312}/bin/python3 ${./zsh/history-guard.py}";
+      history_zsh = "${pkgs.zsh}/bin/zsh";
+    };
     xdg.config.files = {
       "git/config".text = ''
         [user]

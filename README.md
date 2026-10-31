@@ -190,6 +190,24 @@ LazyVim 和 lazy.nvim 固定在 `flake.lock`；其余插件版本位于
 `home/nvim/lazy-lock.snapshot.json` 复制到该位置，再执行 `:Lazy restore`。
 Windows Terminal 如需显示图标，请选择 Nerd Font。
 
+## Zsh 历史记录保护
+
+`home/zsh/interactive.zsh` 与 `home/zsh/history-guard.py` 由 hjem 一起部署，
+WSL 和笔记本共用。历史仍保存在 `~/.local/state/zsh/history`，多终端共享，
+显式启用 `HIST_FCNTL_LOCK`、`HIST_SAVE_BY_COPY`，不混用互斥的增量写入选项。
+锁与复制后替换的行为参考 [Zsh 官方文档](https://zsh.sourceforge.io/Doc/Release/Options.html#History)。
+
+每次启动终端，先用独立 Zsh 进程检查历史是否可读取（不执行历史命令），
+保留两份不同的有效快照 `history.last-good`、`history.previous-good`。
+检测到空字节时，只移除空字节并验证；仍不可读时，尝试恢复有效快照。
+恢复前将原件保存为 `history.corrupt-时间戳`，并在终端显示恢复提示。
+未知损坏且没有有效备份时，保留原件并暂停当前会话的磁盘历史写入。
+目录权限为 0700，历史和快照为 0600；快照可能包含敏感命令，应同历史一样保管。
+快照在启动新终端时更新，不能保证保留异常关机前最后输入的命令。
+
+这套保护降低并恢复常见损坏，不保证抵抗磁盘故障或强制断电。
+更新配置后，现有终端执行 `exec zsh` 或重新打开，以加载保护。
+
 ## WSL 网络、MCP 与备份
 
 WSL 命令行和 nix-daemon 使用 `http://127.0.0.1:7890`，本机地址绕过代理。
