@@ -1,14 +1,22 @@
-# uontabc · NixOS-WSL
+# uontabc · NixOS fleet
 
 Flakes 固定系统依赖，hjem 管理用户文件，LazyVim 管理编辑器插件。
 系统：NixOS 26.05 / Zsh / 英文 / Asia/Shanghai。
+多设备结构与接入方式见 [FLEET.md](./FLEET.md)。
 
 ## 配置布局
 
 ```text
 flake.nix              输入、用户身份、主机和开发环境
-configuration.nix      模块入口及 stateVersion
-modules/               系统、代理、工具链、GPU
+hosts/default.nix      主机清单：每台机器独立选择架构与模块
+hosts/wsl/             已启用的 WSL 主机及其 stateVersion
+hosts/vps/             VPS 代理节点（等待现有主机信息）
+hosts/server/          本地开发服务器（等待现有主机信息）
+lib/mk-host.nix        创建主机的共用入口
+modules/common/        共享 Nix 设置与本机重建命令
+modules/profiles/      可选角色：开发工具与用户环境
+modules/wsl/           WSL、Windows 代理和 CUDA 驱动桥接
+configuration.nix      WSL 模块的兼容入口
 home/                  hjem、Zsh、Starship、Git、LazyVim
 shells/                通用及 CUDA 开发环境
 scripts/cuda-check.py  无额外依赖的 GPU 检测
@@ -22,7 +30,7 @@ mcp/                  独立 MCP 运行环境的依赖锁
 ```sh
 cd /home/uontabc/nixos-config
 nix fmt                       # 格式化 Nix 配置
-nixos-rebuild build --flake .#nixos  # 只构建
+nixos-rebuild build --flake .#wsl    # 只构建 WSL
 rebuild                       # 构建并应用
 sudo nixos-rebuild switch --rollback # 回到上一代系统
 
@@ -72,7 +80,7 @@ hjem 管理的文件不可直接编辑，请修改本仓库 `home/nvim/` 下的�
 
 命令行及 nix-daemon 使用 `http://127.0.0.1:7890`；本机地址绕过代理。
 Windows 代理程序需要保持运行，`.wslconfig` 需要保持 mirrored 模式。
-更换代理端口请修改 `modules/network.nix`。
+更换 Windows 代理端口请修改 `modules/wsl/network.nix`。
 
 ## mcp-nixos
 

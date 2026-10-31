@@ -1,5 +1,5 @@
 {
-  description = "uontabc's NixOS-WSL workstation — systems, tools, and home";
+  description = "uontabc's NixOS fleet — per-host systems and shared profiles";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -33,20 +33,18 @@
         fullName = "uontabc";
         email = "uontabc@gmail.com";
       };
+      hosts = import ./hosts;
+      mkHost = import ./lib/mk-host.nix { inherit inputs identity; };
+      configurations = nixpkgs.lib.mapAttrs mkHost hosts;
       pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
       };
     in
     {
-      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit inputs identity; };
-        modules = [
-          inputs.nixos-wsl.nixosModules.default
-          inputs.hjem.nixosModules.default
-          ./configuration.nix
-        ];
+      nixosConfigurations = configurations // {
+        # Compatibility for commands saved before the fleet layout.
+        nixos = configurations.wsl;
       };
 
       devShells.${system} = import ./shells { inherit pkgs; };

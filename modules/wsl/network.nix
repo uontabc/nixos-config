@@ -4,7 +4,7 @@ let
   bypass = "localhost,127.0.0.1,::1,.localhost";
 in
 {
-  # Windows .wslconfig must keep networkingMode=mirrored.
+  # WSL only: Windows .wslconfig must keep networkingMode=mirrored.
   networking.proxy = {
     default = proxy;
     noProxy = bypass;

@@ -17,7 +17,7 @@
     '')
     (pkgs.writeShellScriptBin "cuda-check" ''
       export LD_LIBRARY_PATH=/usr/lib/wsl/lib:${lib.makeLibraryPath [ pkgs.stdenv.cc.cc ]}
-      exec ${pkgs.python312}/bin/python ${../scripts/cuda-check.py}
+      exec ${pkgs.python312}/bin/python ${../../scripts/cuda-check.py}
     '')
   ];
 }
