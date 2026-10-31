@@ -33,7 +33,7 @@ let
   baseHook = ''
     export UV_PYTHON=${pkgs.python312}/bin/python3
     export UV_PYTHON_DOWNLOADS=never
-    export LD_LIBRARY_PATH=/usr/lib/wsl/lib:${runtime}:''${LD_LIBRARY_PATH:-}
+    export LD_LIBRARY_PATH=/run/opengl-driver/lib:${runtime}:''${LD_LIBRARY_PATH:-}
   '';
 in
 {

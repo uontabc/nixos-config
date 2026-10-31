@@ -1,13 +1,13 @@
 # uontabc · NixOS fleet
 
-一个 Flake 仓库分别管理 WSL、VPS 和本地开发服务器。主配置位于
+一个 Flake 仓库分别管理 WSL、VPS 和 Windows/NixOS 双系统笔记本。主配置位于
 `/home/uontabc/nixos-config`，`/etc/nixos` 指向这里。本文是唯一的配置文档。
 
 | 主机 | 用途 | 当前状态 |
 | --- | --- | --- |
 | `wsl` | Windows 开发工作站、CUDA | 已启用 |
 | `vps` | sing-box / VLESS / REALITY / Vision | 模板，待接入本机配置 |
-| `server` | Python / Rust / C++ 开发服务器 | 模板，待接入本机配置 |
+| `laptop` | 双系统笔记本、桌面与项目开发 | 模板，待确认桌面和安装布局 |
 
 ## 日常操作
 
@@ -35,10 +35,10 @@ flake.nix                 输入锁定、用户身份、系统输出、开发 Sh
 hosts/default.nix         主机清单：架构、模块、仓库在目标上的路径
 hosts/wsl/                当前 WSL 主机
 hosts/vps/                VPS 模板：machine.nix、proxy.nix、模块入口
-hosts/server/             开发服务器模板：machine.nix、模块入口
+hosts/laptop/             双系统笔记本：硬件入口、桌面、原生显卡
 lib/mk-host.nix            创建主机的共用入口
 modules/common/           共享 Nix 设置与管理命令
-modules/profiles/         开发环境、代理节点角色
+modules/profiles/         开发环境、笔记本、代理节点角色
 modules/services/         sing-box REALITY 服务
 modules/wsl/              Windows 代理、WSL GPU 驱动桥接
 home/                     hjem、Zsh、Starship、Git、LazyVim
@@ -50,41 +50,61 @@ mcp/                      MCP 依赖锁
 用户身份集中在 `flake.nix` 的 `identity` 中。当前用户为 `uontabc`，
 系统使用英文和 `Asia/Shanghai` 时区，hjem 管理用户配置文件。
 
-## 接入 VPS 和本地服务器
+## 启用 VPS 与笔记本
 
-两台远程主机尚未注册为可部署输出，也未连接或修改。
-每台机器分别保留自己的磁盘、引导、网络、SSH 访问和 stateVersion。
+`hosts/default.nix` 的 VPS 和笔记本条目目前保持注释状态，只有 WSL 已启用。
+各主机独立选择硬件、服务和引导，Windows 代理与驱动桥接只由 WSL 导入。
 
-1. 把原有 `/etc/nixos` 配置树复制到对应的 `hosts/<name>/existing/`。
-2. 替换该主机的 `machine.nix`，导入原有配置并移除待配置断言。
-   迁移时处理原配置与新角色重复声明的选项。
-3. 在 `hosts/default.nix` 取消该主机条目的注释，填写真实架构
-   （`x86_64-linux` 或 `aarch64-linux`）和目标上的 `configRoot`。
-4. VPS 按下一节准备凭据并修改代理参数。
-5. `git add` 后先构建目标，确认成功后再应用。
-
-模板中的断言会阻止缺少本机配置的部署。
-本地服务器复用开发角色，默认用户 `uontabc` 使用 Zsh 并加入 wheel；
-原有账户继续保留，密码、SSH 密钥和 sudo 策略沿用原配置。
-本机显卡驱动、Docker、数据库和项目服务可加入对应主机的模块列表。
-
-主机注册后可分别构建或通过现有 SSH 管理账户部署：
+VPS 沿用现有 NixOS：把原 `/etc/nixos` 配置树复制到 `hosts/vps/existing/`，
+替换 `machine.nix` 导入原入口并移除待配置断言，保留磁盘、网络、SSH 和原始
+stateVersion；再在主机清单中填写架构与 `configRoot`，按下一节准备代理凭据。
+原配置与新角色重复的选项需要在迁移时处理。
 
 ```sh
+# VPS 注册后
 nixos-rebuild build --flake .#vps
-nixos-rebuild build --flake .#server
-
-# 同架构：在 WSL 构建，远端激活
 nixos-rebuild switch --flake .#vps --target-host USER@VPS --sudo
-
-# 异架构：在目标机器构建并激活
-nixos-rebuild switch --flake .#server \
-  --build-host USER@SERVER --target-host USER@SERVER --sudo
 ```
 
-`--target-host` 只部署系统闭包，不会复制可编辑的 Git 仓库。
-若需要在目标上直接运行 `rebuild`，还需把仓库放到其 `configRoot` 路径。
-各主机的服务独立组合，Windows 代理和 GPU 桥接仅由 WSL 导入。
+异架构远程构建可再加 `--build-host USER@VPS`。
+`--target-host` 只部署系统闭包，不会复制 Git 仓库；远端直接使用 `rebuild`
+需要把仓库放到该主机的 `configRoot`。
+
+### 笔记本双系统模板
+
+原来的 `server` 主机已更名为 `laptop`，目标是当前笔记本上的原生 NixOS。
+检测到的硬件为 Lenovo 83LT、Ryzen 9 8940HX、RTX 5060 Laptop，
+一块约 1 TB 的 GPT 硬盘。Windows 当前只暴露 NVIDIA 显卡。
+
+- `hosts/laptop/desktop.nix`：暂按 KDE Plasma / Wayland + SDDM，桌面选择待确认。
+- `hosts/laptop/graphics.nix`：原生 NVIDIA open 驱动与 CUDA 库路径。
+- `modules/profiles/laptop.nix`：UEFI systemd-boot、NetworkManager、声音、
+  蓝牙、触摸板、电源管理和 AMD 微码；RTC 使用 Windows 现有的本地时间约定。
+- `hosts/laptop/machine.nix`：实际安装时填写根分区、EFI 和加密设备。
+
+笔记本复用 Python、Rust、C++、Zsh、LazyVim 和 hjem，默认用户为 `uontabc`。
+新安装的兼容基线为 `system.stateVersion = "26.05"`。
+没有预设密码或自动登录，安装时需要为该用户设置登录密码。
+
+安装前仍需确认同盘/分盘、已留出的空间和是否加密。模板不包含格式化或自动分区操作。
+从 NixOS 安装介质启动、按选定方案挂载目标后，用
+`nixos-generate-config --root /mnt` 生成真实硬件配置；将其复制到
+`hosts/laptop/hardware-configuration.nix`，在 `machine.nix` 中导入并移除待配置断言。
+然后取消主机清单中 `laptop` 的注释，先构建 `.#laptop` 再继续安装。
+不要把 WSL 生成的硬件配置用于原生系统。
+
+模板使用 systemd-boot。共享 Windows ESP 时可自动发现 Windows；
+ESP、XBOOTLDR 或独立 EFI 的挂载方案需要根据实际分区与剩余空间确定。
+读取到的当前 Secure Boot 状态为关闭，本次没有更改固件设置。
+若之后开启 Secure Boot，需要另行配置签名引导。
+
+PRIME 混合显卡暂未开启。若 Linux 下能看到 AMD 核显与 NVIDIA 独显，
+再根据 `lspci` 的实际 PCI ID 设置 offload；模板没有编造总线地址。
+原生显卡、休眠、Wi-Fi 和触摸板需要安装介质或实际安装后的硬件验证。
+
+参考：[NixOS 安装手册](https://nixos.org/manual/nixos/stable/#sec-installation)、
+[systemd-boot](https://www.freedesktop.org/software/systemd/man/latest/systemd-boot.html)、
+[NVIDIA 内核模块](https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/610/kernel-modules.html)。
 
 ## VPS：VLESS + REALITY + Vision
 
@@ -134,7 +154,7 @@ source .venv/bin/activate
 WSL 已配置 Windows NVIDIA 驱动桥接和动态库兼容层，可用 `nvidia-smi`
 和 `cuda-check` 检查。RTX 5060 的计算能力为 12.0，安装模型框架时选择支持
 该架构的 CUDA wheel。自定义 CUDA 编译放在 `cuda-dev` 中；WSL 内不安装
-Linux NVIDIA 内核驱动。原生服务器按自身显卡选择驱动。
+Linux NVIDIA 内核驱动。原生笔记本使用其独立的 NVIDIA 驱动配置。
 
 运行 `nvim` 启动 LazyVim，`:Lazy` 管理插件。语言服务器和格式化工具由 Nix
 安装，Mason 下载已禁用。hjem 管理的文件从仓库 `home/nvim/` 修改后 rebuild。

@@ -11,8 +11,8 @@
   #   configRoot = "/etc/nixos"; # location of the repository on the VPS
   #   modules = [ ./vps ];
   # };
-  # server = {
-  #   system = "x86_64-linux"; # or "aarch64-linux"
-  #   modules = [ ./server ];
+  # laptop = {
+  #   system = "x86_64-linux";
+  #   modules = [ ./laptop ];
   # };
 }
