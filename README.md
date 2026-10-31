@@ -17,7 +17,6 @@ modules/common/        共享 Nix 设置与本机重建命令
 modules/profiles/      可选角色：开发环境、代理节点
 modules/services/      sing-box REALITY 服务与运行时凭据
 modules/wsl/           WSL、Windows 代理和 CUDA 驱动桥接
-configuration.nix      WSL 模块的兼容入口
 home/                  hjem、Zsh、Starship、Git、LazyVim
 shells/                通用及 CUDA 开发环境
 scripts/cuda-check.py  无额外依赖的 GPU 检测
