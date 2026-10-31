@@ -4,8 +4,8 @@
     modules = [ ./wsl ];
   };
 
-  # Templates: import each machine's existing configuration in machine.nix,
-  # choose its actual architecture, then uncomment the corresponding entry.
+  # VPS: retain its existing configuration. Laptop: use installer-generated
+  # hardware and mounts. Uncomment each entry only after machine.nix is ready.
   # vps = {
   #   system = "x86_64-linux"; # or "aarch64-linux"
   #   configRoot = "/etc/nixos"; # location of the repository on the VPS

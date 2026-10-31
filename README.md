@@ -7,7 +7,7 @@
 | --- | --- | --- |
 | `wsl` | Windows 开发工作站、CUDA | 已启用 |
 | `vps` | sing-box / VLESS / REALITY / Vision | 模板，待接入本机配置 |
-| `laptop` | 双系统笔记本、桌面与项目开发 | 模板，待确认桌面和安装布局 |
+| `laptop` | 同盘双系统、MangoWM + Noctalia、项目开发 | 不加密模板，尚未划定安装空间 |
 
 ## 日常操作
 
@@ -72,21 +72,21 @@ nixos-rebuild switch --flake .#vps --target-host USER@VPS --sudo
 
 ### 笔记本双系统模板
 
-原来的 `server` 主机已更名为 `laptop`，目标是当前笔记本上的原生 NixOS。
+`laptop` 对应当前笔记本上的原生 NixOS，与 Windows 安装在同一块硬盘。
 检测到的硬件为 Lenovo 83LT、Ryzen 9 8940HX、RTX 5060 Laptop，
 一块约 1 TB 的 GPT 硬盘。Windows 当前只暴露 NVIDIA 显卡。
 
-- `hosts/laptop/desktop.nix`：暂按 KDE Plasma / Wayland + SDDM，桌面选择待确认。
+- `hosts/laptop/desktop.nix`：MangoWM + Noctalia 5、greetd 登录、hjem 用户配置。
 - `hosts/laptop/graphics.nix`：原生 NVIDIA open 驱动与 CUDA 库路径。
 - `modules/profiles/laptop.nix`：UEFI systemd-boot、NetworkManager、声音、
   蓝牙、触摸板、电源管理和 AMD 微码；RTC 使用 Windows 现有的本地时间约定。
-- `hosts/laptop/machine.nix`：实际安装时填写根分区、EFI 和加密设备。
+- `hosts/laptop/machine.nix`：实际安装时填写不加密的根分区和 EFI 挂载。
 
 笔记本复用 Python、Rust、C++、Zsh、LazyVim 和 hjem，默认用户为 `uontabc`。
 新安装的兼容基线为 `system.stateVersion = "26.05"`。
 没有预设密码或自动登录，安装时需要为该用户设置登录密码。
 
-安装前仍需确认同盘/分盘、已留出的空间和是否加密。模板不包含格式化或自动分区操作。
+已确认采用同盘双系统、不加密，当前尚未为 NixOS 留出空间。模板不包含格式化、缩容或自动分区操作。
 从 NixOS 安装介质启动、按选定方案挂载目标后，用
 `nixos-generate-config --root /mnt` 生成真实硬件配置；将其复制到
 `hosts/laptop/hardware-configuration.nix`，在 `machine.nix` 中导入并移除待配置断言。
@@ -101,6 +101,32 @@ ESP、XBOOTLDR 或独立 EFI 的挂载方案需要根据实际分区与剩余空
 PRIME 混合显卡暂未开启。若 Linux 下能看到 AMD 核显与 NVIDIA 独显，
 再根据 `lspci` 的实际 PCI ID 设置 offload；模板没有编造总线地址。
 原生显卡、休眠、Wi-Fi 和触摸板需要安装介质或实际安装后的硬件验证。
+
+桌面相关输入分别固定在 `flake.lock`，保留上游所需的 nixpkgs 版本。
+MangoWM 配置在 `home/mango/config.conf`，Noctalia 使用官方 hjem 模块，
+主题为 Catppuccin dark，配置从 `hosts/laptop/desktop.nix` 修改后 rebuild。
+Noctalia 随 Mango 会话启动，负责面板、启动器、通知、锁屏和笔记本控制。
+已配置 10 分钟空闲锁屏、11 分钟熄屏，以及休眠前锁屏；没有设置自动定时挂起。
+
+| 快捷键 | 操作 |
+| --- | --- |
+| Super + Enter | Foot 终端 |
+| Super + Space | Noctalia 启动器 |
+| Super + S / 逗号 | 控制中心 / 设置 |
+| Super + L | 锁屏 |
+| Super + Q / F | 关闭窗口 / 全屏 |
+| Super + 方向键 | 切换焦点 |
+| Super + Shift + 方向键 | 移动窗口 |
+| Super + 1–9 | 切换工作区，增加 Shift 可移动窗口 |
+| Super + R | 重载 Mango 配置 |
+| Super + Shift + E | 退出桌面会话 |
+
+音量和亮度功能键已接入 Noctalia。首次登录前需设置 `uontabc` 的密码；
+登录和锁屏使用该用户密码，不启用自动登录。
+
+参考：[MangoWM](https://mangowm.github.io/docs/)、
+[Noctalia Mango 集成](https://docs.noctalia.dev/noctalia/compositor-settings/mango/)、
+[Noctalia 的 hjem 模块](https://docs.noctalia.dev/noctalia/getting-started/nixos/#hjem-module)。
 
 参考：[NixOS 安装手册](https://nixos.org/manual/nixos/stable/#sec-installation)、
 [systemd-boot](https://www.freedesktop.org/software/systemd/man/latest/systemd-boot.html)、

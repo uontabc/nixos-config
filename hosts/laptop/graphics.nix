@@ -13,5 +13,5 @@
 
   # Windows currently exposes only the RTX 5060. PRIME offload is intentionally
   # unset until a live Linux boot confirms both GPUs and their actual PCI IDs.
-  environment.sessionVariables.LD_LIBRARY_PATH = "/run/opengl-driver/lib:/run/current-system/sw/share/nix-ld/lib";
+  environment.sessionVariables.LD_LIBRARY_PATH = "/run/opengl-driver/lib";
 }

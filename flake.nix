@@ -14,6 +14,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Desktop projects retain their own pinned nixpkgs for their dependencies.
+    mango.url = "github:mangowm/mango";
+    noctalia.url = "github:noctalia-dev/noctalia";
+
     lazyvim = {
       url = "github:LazyVim/LazyVim";
       flake = false;

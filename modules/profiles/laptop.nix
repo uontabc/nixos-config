@@ -1,4 +1,4 @@
-{ lib, identity, ... }:
+{ identity, ... }:
 {
   boot.loader = {
     systemd-boot = {
@@ -15,7 +15,6 @@
   users.users.${identity.username}.extraGroups = [ "networkmanager" ];
 
   hardware.enableRedistributableFirmware = true;
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault true;
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = false;

@@ -9,6 +9,7 @@
   ];
 
   networking.hostName = "laptop";
+  hardware.cpu.amd.updateMicrocode = true;
   # First native installation uses the pinned NixOS 26.05 release.
   system.stateVersion = "26.05";
 }
