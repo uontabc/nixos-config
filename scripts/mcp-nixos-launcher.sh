@@ -7,5 +7,5 @@ export NO_PROXY=$no_proxy
 export LD_LIBRARY_PATH=/usr/lib/wsl/lib:/run/current-system/sw/share/nix-ld/lib
 export PATH=/run/current-system/sw/bin:$PATH
 export NIX_CONFIG='experimental-features = nix-command flakes'
-cd /etc/nixos || exit 1
+cd /home/uontabc/nixos-config || exit 1
 exec /opt/mcp-nixos/venv/bin/mcp-nixos

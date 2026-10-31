@@ -14,8 +14,8 @@ alias cat='bat --paging=never'
 alias v='nvim'
 alias lg='lazygit'
 alias ..='cd ..'
-alias dev='nix develop /etc/nixos#default -c zsh'
-alias cuda-dev='nix develop /etc/nixos#cuda -c zsh'
+alias dev='nix develop "$HOME/nixos-config#default" -c zsh'
+alias cuda-dev='nix develop "$HOME/nixos-config#cuda" -c zsh'
 
 eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"

@@ -17,10 +17,10 @@ mcp/                  独立 MCP 运行环境的依赖锁
 
 ## 日常使用
 
-配置安装于 `/etc/nixos`，默认用户为 `uontabc`。
+配置安装于 `/home/uontabc/nixos-config`，默认用户为 `uontabc`。
 
 ```sh
-cd /etc/nixos
+cd /home/uontabc/nixos-config
 nix fmt                       # 格式化 Nix 配置
 nixos-rebuild build --flake .#nixos  # 只构建
 rebuild                       # 构建并应用
@@ -33,9 +33,11 @@ cuda-check
 ```
 
 `dev` 和 `cuda-dev` 是交互 Zsh 的别名；其他 Shell 可用
-`nix develop /etc/nixos#default` 或 `nix develop /etc/nixos#cuda`。
+`nix develop /home/uontabc/nixos-config#default` 或 `nix develop /home/uontabc/nixos-config#cuda`。
 修改后若新增文件，请先 `git add`，以便 Flakes 读取。
 配置已初始化为本地 Git 仓库，可用 `git diff` 查看修改。
+`/etc/nixos` 是指向这里的兼容链接。重建时由当前用户求值和构建，
+通过 `--sudo` 仅提升激活步骤的权限。
 
 更新依赖是显式操作：`nix flake update`，然后先 build 再 switch。
 `system.stateVersion` 保持首次安装值，不随更新修改。
@@ -89,7 +91,7 @@ wsl.exe -d NixOS -- /opt/mcp-nixos/bin/mcp-nixos
 依赖版本固定在 `mcp/requirements-lock.txt`，重装命令：
 
 ```sh
-sudo bash /etc/nixos/scripts/install-mcp.sh
+sudo bash /home/uontabc/nixos-config/scripts/install-mcp.sh
 ```
 
 MCP 的 Python 解释器已设置独立的 Nix GC root，不依赖临时 `result` 链接。

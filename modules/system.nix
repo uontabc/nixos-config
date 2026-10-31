@@ -1,4 +1,7 @@
 { pkgs, identity, ... }:
+let
+  configRoot = "/home/${identity.username}/nixos-config";
+in
 {
   wsl = {
     enable = true;
@@ -66,7 +69,7 @@
   environment.sessionVariables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
-    NH_FLAKE = "/etc/nixos";
+    NH_FLAKE = configRoot;
   };
 
   environment.systemPackages = with pkgs; [
@@ -96,7 +99,7 @@
       name = "rebuild";
       runtimeInputs = [ nixos-rebuild ];
       text = ''
-        exec sudo nixos-rebuild switch --flake /etc/nixos#nixos "$@"
+        exec nixos-rebuild switch --sudo --flake ${configRoot}#nixos "$@"
       '';
     })
   ];
