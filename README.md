@@ -10,11 +10,12 @@ Flakes 固定系统依赖，hjem 管理用户文件，LazyVim 管理编辑器插
 flake.nix              输入、用户身份、主机和开发环境
 hosts/default.nix      主机清单：每台机器独立选择架构与模块
 hosts/wsl/             已启用的 WSL 主机及其 stateVersion
-hosts/vps/             VPS 代理节点（等待现有主机信息）
-hosts/server/          本地开发服务器（等待现有主机信息）
+hosts/vps/             sing-box / VLESS / REALITY / XTLS 代理节点模板
+hosts/server/          本地开发服务器模板
 lib/mk-host.nix        创建主机的共用入口
 modules/common/        共享 Nix 设置与本机重建命令
-modules/profiles/      可选角色：开发工具与用户环境
+modules/profiles/      可选角色：开发环境、代理节点
+modules/services/      sing-box REALITY 服务与运行时凭据
 modules/wsl/           WSL、Windows 代理和 CUDA 驱动桥接
 configuration.nix      WSL 模块的兼容入口
 home/                  hjem、Zsh、Starship、Git、LazyVim

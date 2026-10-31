@@ -6,10 +6,11 @@
 | 主机 | 用途 | 状态 |
 | --- | --- | --- |
 | `wsl` | Windows 下的开发工作站、CUDA | 已构建并启用 |
-| `vps` | 代理节点 | 目录已预留，等待当前配置与代理软件信息 |
-| `server` | 本地项目开发服务器 | 目录已预留，等待当前配置与硬件信息 |
+| `vps` | sing-box / VLESS / REALITY / XTLS 代理节点 | 模板已完成，等待接入本机原配置 |
+| `server` | Python / Rust / C++ 项目开发服务器 | 模板已完成，等待接入本机原配置 |
 
 `nixos` 暂时作为 `wsl` 的兼容别名。VPS 和服务器尚未注册为可部署输出。
+两份模板的 `machine.nix` 带有明确的待配置断言；未接入真实机器前不会意外部署。
 
 ## 模块如何组合
 
@@ -19,6 +20,8 @@
 - `hosts/wsl/default.nix`：WSL 硬件集成、Windows 代理、开发角色。
 - `modules/profiles/development.nix`：Python、Rust、C++、Zsh、LazyVim、hjem。
 - `modules/wsl/`：Windows localhost 代理与 Windows GPU 驱动桥接。
+- `modules/profiles/proxy-node.nix`：代理节点的服务角色。
+- `modules/services/sing-box-reality.nix`：VLESS + REALITY + Vision 和运行时秘密文件。
 
 每台机器独立保留架构、引导、文件系统、网卡、SSH 访问、服务及
 `system.stateVersion`。开发服务器可复用开发角色，GPU 驱动按其实际硬件配置。
@@ -43,6 +46,28 @@ rebuild
 
 ## 接入两台现有 NixOS
 
-下一步先通过获准的 SSH 连接读取现有配置，确认架构和状态版本，
-保留各自主机的硬件与访问设置，再注册到主机清单。
-当前没有更改任何远程机器。
+1. 将每台机器现有的 `/etc/nixos` 配置树复制到各自的 `hosts/<name>/existing/`。
+2. 替换对应的 `machine.nix`，导入原有入口并移除待配置断言。保留原始 stateVersion。
+3. 在 `hosts/default.nix` 取消相应主机项的注释，填写真实架构和仓库在目标上的路径。
+4. VPS 先按 [节点说明](./hosts/vps/README.md) 生成本机凭据并调整握手域名。
+5. `git add` 后先构建目标，再应用。迁移旧配置时处理与新角色重复声明的选项。
+
+`--target-host` 只部署系统闭包，不会自动复制可编辑的 Git 仓库。
+若还想在远端直接运行 `rebuild`，仓库应放到该主机清单中 `configRoot` 指定的位置。
+
+示例（主机注册后）：
+
+```sh
+nixos-rebuild build --flake .#vps
+nixos-rebuild build --flake .#server
+
+# 同架构时在 WSL 构建，交由现有的 SSH 管理账户激活
+nixos-rebuild switch --flake .#vps --target-host USER@VPS --sudo
+
+# 异架构时交由目标机器构建
+nixos-rebuild switch --flake .#server \
+  --build-host USER@SERVER --target-host USER@SERVER --sudo
+```
+
+服务开关互相独立，修改 VPS 代理参数不会启用 WSL 或开发服务器上的代理服务。
+当前只验证了本地模板和 WSL，尚未连接或修改远程机器。

@@ -42,6 +42,8 @@
       };
     in
     {
+      lib.mkHost = mkHost;
+
       nixosConfigurations = configurations // {
         # Compatibility for commands saved before the fleet layout.
         nixos = configurations.wsl;

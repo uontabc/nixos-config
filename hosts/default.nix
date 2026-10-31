@@ -4,6 +4,15 @@
     modules = [ ./wsl ];
   };
 
-  # Register vps and server after their architecture and hardware are known.
-  # Each host chooses its own modules; WSL settings are not shared.
+  # Templates: import each machine's existing configuration in machine.nix,
+  # choose its actual architecture, then uncomment the corresponding entry.
+  # vps = {
+  #   system = "x86_64-linux"; # or "aarch64-linux"
+  #   configRoot = "/etc/nixos"; # location of the repository on the VPS
+  #   modules = [ ./vps ];
+  # };
+  # server = {
+  #   system = "x86_64-linux"; # or "aarch64-linux"
+  #   modules = [ ./server ];
+  # };
 }

@@ -11,6 +11,7 @@
     description = identity.fullName;
     shell = pkgs.zsh;
     extraGroups = [
+      "wheel"
       "video"
       "render"
     ];
