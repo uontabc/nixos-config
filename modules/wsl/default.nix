@@ -10,6 +10,10 @@
     enable = true;
     defaultUser = identity.username;
     useWindowsDriver = true;
+    # Keep host drives and explicit .exe calls, without importing Windows tools.
+    interop.includePath = false;
+    startMenuLaunchers = false;
+    wslConf.interop.appendWindowsPath = false;
     wslConf.automount.options = "metadata,uid=1000,gid=100,umask=022";
   };
 

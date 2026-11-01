@@ -1,15 +1,17 @@
-{ ... }:
+{ inputs, ... }:
 {
   imports = [
+    inputs.disko.nixosModules.disko
     ./machine.nix
+    ./disko.nix
+    ./impermanence.nix
     ../../modules/profiles/development.nix
     ../../modules/profiles/laptop.nix
     ./graphics.nix
     ./desktop.nix
   ];
 
-  networking.hostName = "laptop";
   hardware.cpu.amd.updateMicrocode = true;
-  # First native installation uses the pinned NixOS 26.05 release.
+  # Fresh-install compatibility baseline; keep it after subsequent upgrades.
   system.stateVersion = "26.05";
 }

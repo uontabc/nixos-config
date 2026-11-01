@@ -5,6 +5,35 @@
   ...
 }:
 let
+  treesitter = pkgs.vimPlugins.nvim-treesitter.withPlugins (
+    p: with p; [
+      bash
+      c
+      cpp
+      diff
+      json
+      lua
+      luadoc
+      luap
+      markdown
+      markdown_inline
+      nix
+      printf
+      python
+      query
+      regex
+      rust
+      toml
+      vim
+      vimdoc
+      yaml
+    ]
+  );
+  treesitterRuntime = pkgs.symlinkJoin {
+    name = "neovim-project-parsers";
+    paths = treesitter.dependencies;
+  };
+
   # lazy.nvim updates its own helptags at runtime. Build that index once and
   # skip only that write when running the pinned, immutable Nix-store copy.
   lazyNvim =
@@ -39,6 +68,7 @@ let
       '';
 in
 {
+  imports = [ ./theme.nix ];
   hjem.users.${identity.username} = {
     enable = true;
     # Manage individual files so plugin state and locks remain writable.
@@ -66,13 +96,14 @@ in
         [merge]
           conflictStyle = zdiff3
       '';
-      "starship.toml".source = ./starship.toml;
       "nvim/init.lua".source = ./nvim/init.lua;
       "nvim/lua/config/lazy.lua".source = pkgs.replaceVars ./nvim/lua/config/lazy.lua {
         lazy_nvim = lazyNvim;
         lazyvim = lazyVim;
       };
-      "nvim/lua/config/options.lua".source = ./nvim/lua/config/options.lua;
+      "nvim/lua/config/options.lua".source = pkgs.replaceVars ./nvim/lua/config/options.lua {
+        treesitter_runtime = treesitterRuntime;
+      };
       "nvim/lua/config/keymaps.lua".source = ./nvim/lua/config/keymaps.lua;
       "nvim/lua/config/autocmds.lua".source = ./nvim/lua/config/autocmds.lua;
       "nvim/lua/plugins/development.lua".source = ./nvim/lua/plugins/development.lua;

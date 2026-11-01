@@ -1,7 +1,9 @@
 { pkgs, identity, ... }:
 {
   imports = [
-    ../development.nix
+    ../editor.nix
+    ../services/docker.nix
+    ../services/pi
     ../../home
   ];
 
@@ -59,6 +61,7 @@
     zoxide
     starship
     btop
+    fastfetch
     tree
     tmux
     file

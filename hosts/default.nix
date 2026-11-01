@@ -1,18 +1,18 @@
 {
-  wsl = {
+  graphene = {
     system = "x86_64-linux";
-    modules = [ ./wsl ];
+    modules = [ ./graphene ];
   };
 
-  # VPS: retain its existing configuration. Laptop: use installer-generated
-  # hardware and mounts. Uncomment each entry only after machine.nix is ready.
-  # vps = {
+  # VPS: future full reinstall. Laptop: verified Linux-only partitions.
+  # Uncomment only after disk targets, hardware and machine.nix are ready.
+  # nano = {
   #   system = "x86_64-linux"; # or "aarch64-linux"
   #   configRoot = "/etc/nixos"; # location of the repository on the VPS
-  #   modules = [ ./vps ];
+  #   modules = [ ./nano ];
   # };
-  # laptop = {
+  # carbon = {
   #   system = "x86_64-linux";
-  #   modules = [ ./laptop ];
+  #   modules = [ ./carbon ];
   # };
 }

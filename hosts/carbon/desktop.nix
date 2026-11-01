@@ -7,6 +7,7 @@
   ...
 }:
 let
+  theme = import ../../lib/theme.nix;
   noctaliaUpstream = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
   # GUI dependencies must not inherit a project's older C++ runtime via LD_LIBRARY_PATH.
   noctalia = pkgs.symlinkJoin {
@@ -24,18 +25,31 @@ let
     export XDG_CURRENT_DESKTOP=mango
     export XDG_SESSION_DESKTOP=mango
     export XDG_SESSION_TYPE=wayland
-    exec ${lib.getExe config.programs.mango.package}
+    trap '${pkgs.systemd}/bin/systemctl --user stop mango-session.target' EXIT
+    ${lib.getExe config.programs.mango.package}
   '';
   startup = pkgs.writeShellScript "mango-startup" ''
     ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd \
       WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE PATH
+    export GSETTINGS_SCHEMA_DIR=${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}/glib-2.0/schemas
+    ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+    ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface gtk-theme ${lib.escapeShellArg theme.gtkName}
+    ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface icon-theme ${lib.escapeShellArg theme.icons}
+    ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface cursor-theme ${lib.escapeShellArg theme.cursorName}
+    ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface cursor-size 24
+    ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface font-name ${lib.escapeShellArg "${theme.fonts.sans} ${toString theme.fonts.size}"}
+    ${pkgs.systemd}/bin/systemctl --user start mango-session.target
     ${lib.getExe noctalia} --daemon
     exec ${pkgs.swayidle}/bin/swayidle -w \
       before-sleep '${lib.getExe noctalia} msg session lock'
   '';
 in
 {
-  imports = [ inputs.mango.nixosModules.mango ];
+  imports = [
+    inputs.mango.nixosModules.mango
+    ./appearance.nix
+    ./vicinae.nix
+  ];
   programs.mango.enable = true;
 
   services.greetd = {
@@ -57,7 +71,7 @@ in
       systemd.enable = false;
       settings = {
         shell = {
-          font_family = "JetBrainsMono Nerd Font";
+          font_family = theme.fonts.sans;
           lang = "en";
           polkit_agent = true;
         };
@@ -65,6 +79,10 @@ in
           mode = "dark";
           source = "builtin";
           builtin = "Catppuccin";
+          templates = {
+            enable_builtin_templates = false;
+            enable_community_templates = false;
+          };
         };
         idle.behavior = {
           lock = {
@@ -83,20 +101,17 @@ in
     xdg.config.files = {
       "mango/config.conf".source = pkgs.replaceVars ../../home/mango/config.conf {
         inherit startup;
+        ghostty = lib.getExe pkgs.ghostty;
+        base = lib.removePrefix "#" theme.colors.base;
+        border = lib.removePrefix "#" theme.colors.surface1;
+        accent = lib.removePrefix "#" theme.colors.mauve;
       };
-      "foot/foot.ini".text = ''
-        [main]
-        font=JetBrainsMono Nerd Font:size=11
-        pad=12x12
-        [colors]
-        alpha=0.96
-      '';
     };
   };
 
   environment.systemPackages = with pkgs; [
     firefox
-    foot
+    ghostty
     wl-clipboard
     xdg-utils
   ];

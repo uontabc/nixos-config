@@ -5,7 +5,10 @@
   ...
 }:
 {
-  environment.sessionVariables.NH_FLAKE = configRoot;
+  programs.nh = {
+    enable = true;
+    flake = configRoot;
+  };
   environment.systemPackages = [
     pkgs.git
     (pkgs.writeShellApplication {

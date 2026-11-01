@@ -1,3 +1,4 @@
+vim.g.uontabc_treesitter_runtime = "@treesitter_runtime@"
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 vim.g.lazyvim_python_lsp = "pyright"

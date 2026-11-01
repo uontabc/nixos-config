@@ -4,8 +4,12 @@
     systemd-boot = {
       enable = true;
       configurationLimit = 5;
+      xbootldrMountPoint = "/boot";
     };
-    efi.canTouchEfiVariables = true;
+    efi = {
+      canTouchEfiVariables = true;
+      efiSysMountPoint = "/efi";
+    };
     timeout = 5;
   };
 

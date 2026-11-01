@@ -1,6 +1,9 @@
-{ lib, ... }:
+{ lib, hostKey, ... }:
 {
   imports = [ ./management.nix ];
+
+  # One name for the machine hostname, flake target and rebuild command.
+  networking.hostName = hostKey;
 
   time.timeZone = lib.mkDefault "Asia/Shanghai";
   i18n.defaultLocale = lib.mkDefault "en_US.UTF-8";
