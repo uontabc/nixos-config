@@ -1,10 +1,16 @@
-{ identity, ... }:
+{ identity, pkgs, ... }:
 {
   boot.loader = {
-    systemd-boot = {
+    systemd-boot.enable = false;
+    grub = {
       enable = true;
+      efiSupport = true;
+      device = "nodev";
+      # Keep kernels and initrds on /boot, not the small shared Windows ESP.
+      copyKernels = true;
       configurationLimit = 5;
-      xbootldrMountPoint = "/boot";
+      useOSProber = true;
+      theme = pkgs.sleek-grub-theme.override { withStyle = "light"; };
     };
     efi = {
       canTouchEfiVariables = true;

@@ -220,9 +220,11 @@ GPU 容器运行时未启用，需要另配 NVIDIA Container Toolkit。
 
 carbon 使用 MangoWM + Noctalia，Ghostty 为终端，Vicinae 为启动器。
 共享主题为 Catppuccin Mocha / Mauve，界面字体为 Noto Sans，终端字体为 JetBrainsMono Nerd Font。
+carbon 的 UEFI 引导使用 GRUB，独立采用 sleek-grub-theme 的 light 变体（Sleek-theme-light）。
 
 | 修改内容 | 配置位置 |
 | --- | --- |
+| GRUB 引导与 Sleek light 主题 | `modules/profiles/laptop.nix` |
 | 色板、字体与主题名称 | `lib/theme.nix` |
 | 终端、命令行与编辑器配色 | `home/theme.nix`、`home/nvim/` |
 | 窗口管理与快捷键 | `home/mango/config.conf` |
