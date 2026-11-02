@@ -373,8 +373,11 @@ nixos-generate-config --no-filesystems --show-hardware-config \
 查看生成文件，核对 CPU、initrd 存储模块和平台。文件系统统一由 Disko 管理，
 所以这里使用 `--no-filesystems`，不要混入旧系统的 UUID 挂载声明，也不要复制 WSL 硬件配置。
 
-NVIDIA 当前配置使用 open 驱动，没有启用 PRIME offload。
-若 Live 环境发现核显和独显，记录实际 PCI ID；不要照搬网上其他机型的 Bus ID。
+RTX 5060 Laptop（Blackwell）使用 NVIDIA 开源内核模块，驱动使用锁定 nixpkgs 的 beta 分支，
+同时启用 32 位 OpenGL / Vulkan 支持供 Steam / Proton 使用。
+本配置按独显直连使用，不配置 PRIME offload、sync、reverse sync 或 GPU Bus ID。
+若固件提供显卡模式选项，选择独显直连 / dGPU-only，并在 Linux 中确认内屏由 NVIDIA 驱动；
+若内屏实际只能经核显输出，当前单显卡方案可能无法正常显示，需要重新确认硬件路由，不能仅靠配置强制直连。
 
 ### 5.2 完成 `hosts/carbon/machine.nix`
 
@@ -759,9 +762,15 @@ pi mcp list
 - [ ] Wi-Fi 重连、声音、麦克风、蓝牙可用；蓝牙默认不自动开电源。
 - [ ] 触摸板、键盘、亮度快捷键、锁屏可用。
 - [ ] 接电与电池模式正常，挂起后能够唤醒。
-- [ ] NVIDIA 驱动正常；如需 PRIME，先确认真实 GPU 与 PCI ID 再配置。
+- [ ] `nvidia-smi` 能识别 RTX 5060 Laptop，内屏与外接屏按独显方案正常工作。
+- [ ] Steam 可以启动，在「设置 → 兼容性」中启用 Steam Play / Proton，按游戏需要选择 Proton Experimental 或稳定版。
+- [ ] 实测一款游戏的 Vulkan / DXVK / VKD3D 渲染、声音与手柄输入；反作弊不支持 Linux 的游戏仍在 Windows 中运行。
 - [ ] Docker daemon 正常；拉取镜像还需要单独验证网络 / 镜像源。
 - [ ] Pi MCP 配置可加载；提供商登录、Token 等仍需用户单独配置。
+
+Steam 默认游戏库、Proton 前缀和着色器缓存位于持久化的 home 中，无需额外添加系统持久化目录。
+建议将 Linux 游戏库放在 Btrfs 的 home 下，不与 Windows 共用 NTFS 上的 Proton 游戏库。
+本配置不额外开放 Remote Play、局域网传输或专用服务器端口。
 
 未配置休眠交换分区，**挂起成功不代表休眠到磁盘可用**。
 不建议一开始同时改 GPU 路由、休眠、电源策略和主题；一次改一类，方便定位问题。
@@ -930,7 +939,8 @@ nixos-enter --root /mnt -c \
 | [`hosts/carbon/disko.nix`](../hosts/carbon/disko.nix) | 分区级文件系统、挂载和安全断言 |
 | [`hosts/carbon/impermanence.nix`](../hosts/carbon/impermanence.nix) | 根目录重建、持久化白名单、密码文件 |
 | [`modules/profiles/laptop.nix`](../modules/profiles/laptop.nix) | UEFI GRUB、Sleek light、Windows 探测和笔记本基础服务 |
-| [`hosts/carbon/graphics.nix`](../hosts/carbon/graphics.nix) | NVIDIA 驱动与图形设置 |
+| [`hosts/carbon/graphics.nix`](../hosts/carbon/graphics.nix) | RTX 5060 Laptop 驱动、独显方案与 32 位图形支持 |
+| [`hosts/carbon/desktop.nix`](../hosts/carbon/desktop.nix) | 桌面、Steam 与 PCManFM |
 | [`scripts/check-linux-partition.sh`](../scripts/check-linux-partition.sh) | 拒绝整盘、检查分区名称与 boot 类型 |
 | [`scripts/reset-btrfs-root.sh`](../scripts/reset-btrfs-root.sh) | 启动时检查持久化状态并重建 `@root` |
 

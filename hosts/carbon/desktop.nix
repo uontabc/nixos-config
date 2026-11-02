@@ -51,14 +51,14 @@ in
     ./vicinae.nix
   ];
   programs.mango.enable = true;
-  programs.thunar = {
-    enable = true;
-    plugins = [ pkgs.thunar-volman ];
-  };
+  # Includes the Steam runtime, controller rules and 32-bit audio support.
+  # Remote Play / LAN transfer firewall ports remain closed by default.
+  programs.steam.enable = true;
+  # PCManFM uses GVfs / UDisks for trash, remote locations and removable media.
+  # Run only as a file manager, without PCManFM's desktop management.
   services.gvfs.enable = true;
   services.udisks2.enable = true;
-  services.tumbler.enable = true;
-  xdg.mime.defaultApplications."inode/directory" = "thunar.desktop";
+  xdg.mime.defaultApplications."inode/directory" = "pcmanfm.desktop";
 
   services.greetd = {
     enable = true;
@@ -92,6 +92,7 @@ in
             enable_community_templates = false;
           };
         };
+        wallpaper.enabled = false;
         idle.behavior = {
           lock = {
             enabled = true;
@@ -110,7 +111,7 @@ in
       "mango/config.conf".source = pkgs.replaceVars ../../home/mango/config.conf {
         inherit startup;
         ghostty = lib.getExe pkgs.ghostty;
-        thunar = lib.getExe config.programs.thunar.package;
+        file_manager = lib.getExe pkgs.pcmanfm;
         base = lib.removePrefix "#" theme.colors.base;
         border = lib.removePrefix "#" theme.colors.surface1;
         accent = lib.removePrefix "#" theme.colors.mauve;
@@ -121,6 +122,7 @@ in
   environment.systemPackages = with pkgs; [
     firefox
     ghostty
+    pcmanfm
     wl-clipboard
     xdg-utils
   ];

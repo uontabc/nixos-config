@@ -218,10 +218,14 @@ GPU 容器运行时未启用，需要另配 NVIDIA Container Toolkit。
 
 ## 桌面与主题
 
-carbon 使用 MangoWM + Noctalia，Ghostty 为终端，Vicinae 为启动器，Thunar 为默认文件管理器。
-Thunar 配套启用 GVfs（回收站与远程文件访问）、UDisks2 / thunar-volman（可移动设备管理）和 Tumbler（缩略图）。
+carbon 使用 MangoWM + Noctalia，Ghostty 为终端，Vicinae 为启动器，PCManFM（GTK 3 版）为默认文件管理器。
+PCManFM 配套启用 GVfs（回收站与远程文件访问）和 UDisks2（可移动设备支持），使用自身的缩略图功能。
+PCManFM 只以文件管理模式运行，不启用 `pcmanfm --desktop`。
 共享主题为 Catppuccin Mocha / Mauve，界面字体为 Noto Sans，终端字体为 JetBrainsMono Nerd Font。
 carbon 的 UEFI 引导使用 GRUB，独立采用 sleek-grub-theme 的 light 变体（Sleek-theme-light）。
+游戏环境启用 Steam、RTX 5060 Laptop 的 NVIDIA beta 驱动（开源内核模块）及 32 位 OpenGL / Vulkan 支持，
+按独显直连使用，不配置 PRIME 双显卡切换。Windows 游戏在 Steam「设置 → 兼容性」中启用 Steam Play / Proton；
+具体游戏的兼容性和反作弊限制仍需逐一确认。
 
 | 修改内容 | 配置位置 |
 | --- | --- |
@@ -229,14 +233,15 @@ carbon 的 UEFI 引导使用 GRUB，独立采用 sleek-grub-theme 的 light 变�
 | 色板、字体与主题名称 | `lib/theme.nix` |
 | 终端、命令行与编辑器配色 | `home/theme.nix`、`home/nvim/` |
 | 窗口管理与快捷键 | `home/mango/config.conf` |
-| 面板、通知、锁屏、文件管理器 | `hosts/carbon/desktop.nix` |
+| 面板、通知、锁屏、文件管理器、Steam | `hosts/carbon/desktop.nix` |
+| RTX 5060 Laptop beta 驱动与 32 位图形支持 | `hosts/carbon/graphics.nix` |
 | GTK / Qt 外观 | `hosts/carbon/appearance.nix` |
 | 启动器 | `hosts/carbon/vicinae.nix` |
 
 | 快捷键 | 操作 |
 | --- | --- |
 | `Super+Enter` / `Super+Space` | 终端 / 启动器 |
-| `Super+E` | 文件管理器 |
+| `Super+E` | PCManFM 文件管理器 |
 | `Super+S` / `Super+,` | 控制中心 / 设置 |
 | `Super+L` | 锁屏 |
 | `Super+Q` / `Super+F` | 关闭窗口 / 全屏 |
