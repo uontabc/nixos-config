@@ -238,6 +238,25 @@ LazyVim 和 lazy.nvim 由 Flake 锁定，其余插件锁在 `~/.local/state/nvim
 重装时可将 `home/nvim/lazy-lock.snapshot.json` 复制到该位置，再执行 `:Lazy restore`。
 完整键位见 [LazyVim 文档](https://www.lazyvim.org/keymaps)。
 
+### 终端分屏与会话
+
+- **WSL（graphene）**：安装 Zellij，执行 `zellij` 手动启动。不自动进入会话，不托管
+  Zellij 配置；需要时自行配置 `~/.config/zellij/config.kdl`。
+- **笔记本（carbon）**：使用 Ghostty 自带标签页与分屏，不额外安装终端多路复用器。
+- 开发角色不再安装或配置 tmux；VPS 代理角色仍保留 tmux。
+
+Ghostty 的 Linux 默认快捷键：
+
+| 快捷键 | 操作 |
+| --- | --- |
+| `Ctrl+Shift+o` / `Ctrl+Shift+e` | 向右 / 向下分屏 |
+| `Ctrl+Alt+方向键` | 切换分屏焦点 |
+| `Ctrl+Shift+Enter` | 当前分屏最大化 / 恢复 |
+| `Ctrl+Shift+t` | 新建标签页 |
+
+可用 `ghostty +list-keybinds --default` 查看当前版本默认键位。
+Ghostty 分屏不等同于后台会话保持；需要断开终端后继续运行任务时，再考虑 Zellij 等工具。
+
 ### Docker
 
 开发角色启用原生 Docker Engine、Compose 与 Buildx，VPS 代理角色不启用。

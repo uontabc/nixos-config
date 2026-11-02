@@ -66,7 +66,6 @@
         btop
         fastfetch
         tree
-        tmux
         file
         which
         nixfmt

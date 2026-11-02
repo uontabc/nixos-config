@@ -30,16 +30,6 @@ let
 in
 {
   hjem.users.${identity.username} = {
-    files.".tmux.conf".text = ''
-      set -g default-terminal "tmux-256color"
-      set -as terminal-features ",xterm-ghostty:RGB"
-      set -g status-style "bg=${c.mantle},fg=${c.text}"
-      set -g message-style "bg=${c.surface0},fg=${c.mauve}"
-      set -g pane-border-style "fg=${c.surface1}"
-      set -g pane-active-border-style "fg=${c.mauve}"
-      setw -g window-status-current-style "bg=${c.surface0},fg=${c.mauve},bold"
-      set -g mode-style "bg=${c.surface1},fg=${c.text}"
-    '';
     xdg.config.files = {
       "starship.toml".source = (pkgs.formats.toml { }).generate "starship-fleet.toml" starship;
       "ghostty/config.ghostty".text = ''
