@@ -251,11 +251,11 @@
         "scenefx": "scenefx"
       },
       "locked": {
-        "lastModified": 1793419150,
-        "narHash": "sha256-xVeMx/9r9aKC/aF9QyzOXCqGDkMF9yLiz4b6A6dwc7g=",
+        "lastModified": 1793531872,
+        "narHash": "sha256-qomX53YqENqY6l25eo0xHJWdR1YSuemWONEFSfBqCRU=",
         "owner": "mangowm",
         "repo": "mango",
-        "rev": "09828ec9af23eff9c54a64091ea11d763f322095",
+        "rev": "9d1b0c27e41e435ffe4b06fe522a537afff5473a",
         "type": "github"
       },
       "original": {
@@ -382,11 +382,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1792773339,
-        "narHash": "sha256-17eNBI5Khe4JZaRkL5hRGPWf8MZ6qv+bWAr4V8YeKBw=",
-        "rev": "3ec636362e1816bc2f0888fa0fa2c69f1bc9e504",
+        "lastModified": 1793341285,
+        "narHash": "sha256-LOv16TsMYV2/8BUYnhSxHkOASe7es2ORbqMeLlZJ8Hc=",
+        "rev": "1c89083e451e891152365b799595cf7790a43325",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1100280.3ec636362e18/nixexprs.tar.zst"
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1105037.1c89083e451e/nixexprs.tar.zst"
       },
       "original": {
         "type": "tarball",
@@ -430,11 +430,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1793461235,
-        "narHash": "sha256-l2f1vpwVAnL8gB8vXzFMkqOQMBo/8w09nW1KL+BCs54=",
+        "lastModified": 1793595591,
+        "narHash": "sha256-JzRkpXAxvR8/fFM0aV63W13wWOHSkhQOymdr6RiQGmU=",
         "owner": "noctalia-dev",
         "repo": "noctalia",
-        "rev": "5d5cda62e972469fea595cbe9a08da4be538fec2",
+        "rev": "cece614d286fd0c22e432213735b3ee451472342",
         "type": "github"
       },
       "original": {
@@ -475,11 +475,11 @@
         "nixpkgs-x86_64-darwin": "nixpkgs-x86_64-darwin"
       },
       "locked": {
-        "lastModified": 1793470297,
-        "narHash": "sha256-Y9yRbIhSl49sRH8ePMUn896XIg6XRgpMYGEXcw3pNnc=",
+        "lastModified": 1793546272,
+        "narHash": "sha256-r6OE/eL0hlkdpA8v3g7ilG6dp0IlDxav96CdBghoZdA=",
         "owner": "lukasl-dev",
         "repo": "pi.nix",
-        "rev": "461cd691eb831cdcf911ecd2dc1a7b2f00e71cf4",
+        "rev": "7da31c8602620be9102afbfe49785e9ca1e935c3",
         "type": "github"
       },
       "original": {
