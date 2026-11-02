@@ -1,8 +1,8 @@
-{ ... }:
+{ self, ... }:
 {
   imports = [
-    ../../modules/wsl
-    ../../modules/profiles/development.nix
+    self.modules.nixos.wsl
+    self.modules.nixos.development
     ../../home/yazi.nix
   ];
 

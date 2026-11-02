@@ -1,7 +1,7 @@
 # NixOS Config
 
-使用 Nix Flakes 管理 WSL、双系统笔记本与 VPS，使用 hjem 管理用户配置。
-系统跟随 `nixos-unstable`，依赖版本由 `flake.lock` 固定。
+使用 Nix Flakes + [flake-parts](https://github.com/hercules-ci/flake-parts) 管理 WSL、双系统笔记本与 VPS，
+使用 hjem 管理用户配置。系统跟随 `nixos-unstable`，依赖版本由 `flake.lock` 固定。
 
 [日常维护](#日常维护) · [远程安装](#远程安装) · [目录结构](#目录结构) · [开发环境](#开发环境) · [桌面与主题](#桌面与主题) · [WSL](#wsl)
 
@@ -14,7 +14,7 @@
 | `nano` | VPS · VLESS + REALITY + Vision | 重装模板，清单暂未启用 | [部署说明](docs/nano-deploy.md) |
 
 主机名、Flake 目标和 `rebuild` 目标保持一致。主机清单位于 `hosts/default.nix`，
-用户身份集中在 `flake.nix` 的 `identity` 中，当前用户为 `uontabc`。
+用户身份集中在 `modules/hosts.nix` 的 `identity` 中，当前用户为 `uontabc`。
 
 ## 日常维护
 
@@ -63,9 +63,10 @@ WSL 使用其专用安装方式，carbon 继续使用[保留 Windows 的分区�
 ## 目录结构
 
 ```text
-flake.nix          输入、身份、主机输出与开发模板
+flake.nix          输入与 mkFlake + import-tree 自动导入入口
 hosts/             主机清单及各机硬件、磁盘、桌面或服务配置
 lib/               主机构造函数、共享主题
+modules/           自动发现的 flake-parts 模块；NixOS 配置经 flake.modules.nixos 导出
 modules/common/    Nix 设置、nh 与 rebuild
 modules/profiles/  开发环境、笔记本、代理节点角色
 modules/services/  Docker、Pi、sing-box
@@ -78,6 +79,46 @@ scripts/           分区检查、根目录重置、REALITY 初始化与 MCP 维
 mcp/               Windows Codex 使用的 MCP 依赖锁
 docs/              安装与部署指南
 ```
+
+### Flake 模块约定
+
+入口参考 [ocfox/island](https://github.com/ocfox/island) 的写法，不另设 `flake/` 目录：
+
+```nix
+outputs = inputs:
+  inputs.flake-parts.lib.mkFlake { inherit inputs; }
+    (inputs.import-tree ./modules);
+```
+
+`import-tree` 递归发现 `modules/` 中的 `.nix` 文件；这些文件全部是 flake-parts 模块。
+新增文件不必维护入口导入列表，但 Git Flake 仍要求先 `git add`。路径含 `/_` 的辅助文件默认不自动导入。
+
+- `modules/flake-parts.nix`：启用官方 `flakeModules.modules` 注册表，声明 `systems`、
+  `perSystem.apps`、`perSystem.devShells`、`perSystem.formatter`，保留 `allowUnfree` 策略。
+- `modules/hosts.nix`：用户身份、`flake.nixosConfigurations` 与 `flake.lib.mkHost`；主机清单仍是 `hosts/default.nix`。
+- `modules/templates.nix`：`flake.templates`，独立项目模板与其锁文件保持独立。
+- 其他文件将 NixOS 配置定义在 `flake.modules.nixos.<名称>` 内，而不是直接在外层写 NixOS 选项。
+  自动发现只注册模块，不会自动启用所有服务；角色与主机通过 `self.modules.nixos.<名称>` 显式组合。
+
+例如新增功能文件可写为：
+
+```nix
+{ ... }:
+{
+  flake.modules.nixos.example = { pkgs, ... }: {
+    environment.systemPackages = [ pkgs.hello ];
+  };
+}
+```
+
+随后在需要该功能的主机或角色中导入 `self.modules.nixos.example`。
+`lib/mk-host.nix` 提供 NixOS 层的 `self`、`inputs`、`identity` 等参数；
+flake-parts 外层参数与内层 NixOS 参数是两个作用域，不要混用 `config` / `pkgs`。
+
+`systems` 声明 `x86_64-linux` 和 `aarch64-linux`，安装工具、开发 Shell 与格式化器统一在这两个平台导出。
+这不会自动启用 carbon / nano，也不会改变主机平台或移除安装保护。
+这里只采用 island 的模块组织方式，不引入其 Kix、私有缓存、主机或密钥配置。
+细节参考 [flake-parts 文档](https://flake.parts/module-arguments)和 [import-tree 文档](https://github.com/vic/import-tree)。
 
 ## 开发环境
 

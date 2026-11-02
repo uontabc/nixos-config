@@ -1,11 +1,11 @@
-{ inputs, ... }:
+{ inputs, self, ... }:
 {
   imports = [
     inputs.disko.nixosModules.disko
     ./machine.nix
     ./disko.nix
     ./proxy.nix
-    ../../modules/profiles/proxy-node.nix
+    self.modules.nixos.proxy-node
   ];
 
 }

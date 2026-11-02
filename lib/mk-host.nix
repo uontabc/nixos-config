@@ -8,6 +8,7 @@ hostKey:
 inputs.nixpkgs.lib.nixosSystem {
   inherit system;
   specialArgs = {
+    inherit (inputs) self;
     inherit
       inputs
       identity
@@ -17,7 +18,7 @@ inputs.nixpkgs.lib.nixosSystem {
   };
   modules = [
     inputs.hjem.nixosModules.default
-    ../modules/common
+    inputs.self.modules.nixos.common
   ]
   ++ modules;
 }
