@@ -51,6 +51,14 @@ in
     ./vicinae.nix
   ];
   programs.mango.enable = true;
+  programs.thunar = {
+    enable = true;
+    plugins = [ pkgs.thunar-volman ];
+  };
+  services.gvfs.enable = true;
+  services.udisks2.enable = true;
+  services.tumbler.enable = true;
+  xdg.mime.defaultApplications."inode/directory" = "thunar.desktop";
 
   services.greetd = {
     enable = true;
@@ -102,6 +110,7 @@ in
       "mango/config.conf".source = pkgs.replaceVars ../../home/mango/config.conf {
         inherit startup;
         ghostty = lib.getExe pkgs.ghostty;
+        thunar = lib.getExe config.programs.thunar.package;
         base = lib.removePrefix "#" theme.colors.base;
         border = lib.removePrefix "#" theme.colors.surface1;
         accent = lib.removePrefix "#" theme.colors.mauve;

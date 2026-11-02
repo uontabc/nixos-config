@@ -218,7 +218,8 @@ GPU 容器运行时未启用，需要另配 NVIDIA Container Toolkit。
 
 ## 桌面与主题
 
-carbon 使用 MangoWM + Noctalia，Ghostty 为终端，Vicinae 为启动器。
+carbon 使用 MangoWM + Noctalia，Ghostty 为终端，Vicinae 为启动器，Thunar 为默认文件管理器。
+Thunar 配套启用 GVfs（回收站与远程文件访问）、UDisks2 / thunar-volman（可移动设备管理）和 Tumbler（缩略图）。
 共享主题为 Catppuccin Mocha / Mauve，界面字体为 Noto Sans，终端字体为 JetBrainsMono Nerd Font。
 carbon 的 UEFI 引导使用 GRUB，独立采用 sleek-grub-theme 的 light 变体（Sleek-theme-light）。
 
@@ -228,13 +229,14 @@ carbon 的 UEFI 引导使用 GRUB，独立采用 sleek-grub-theme 的 light 变�
 | 色板、字体与主题名称 | `lib/theme.nix` |
 | 终端、命令行与编辑器配色 | `home/theme.nix`、`home/nvim/` |
 | 窗口管理与快捷键 | `home/mango/config.conf` |
-| 面板、通知、锁屏 | `hosts/carbon/desktop.nix` |
+| 面板、通知、锁屏、文件管理器 | `hosts/carbon/desktop.nix` |
 | GTK / Qt 外观 | `hosts/carbon/appearance.nix` |
 | 启动器 | `hosts/carbon/vicinae.nix` |
 
 | 快捷键 | 操作 |
 | --- | --- |
 | `Super+Enter` / `Super+Space` | 终端 / 启动器 |
+| `Super+E` | 文件管理器 |
 | `Super+S` / `Super+,` | 控制中心 / 设置 |
 | `Super+L` | 锁屏 |
 | `Super+Q` / `Super+F` | 关闭窗口 / 全屏 |
@@ -248,6 +250,16 @@ carbon 的 UEFI 引导使用 GRUB，独立采用 sleek-grub-theme 的 light 变�
 ## WSL
 
 Windows 中的发行版注册名为 `NixOS`，与 Linux 主机名 `graphene` 不同。
+
+WSL 的终端文件管理器为 Yazi，仅在 `graphene` 启用，配置位于 `home/yazi.nix`。
+主题使用 `lib/theme.nix` 的 Catppuccin Mocha 色板和 Mauve 强调色，由 hjem 生成
+`~/.config/yazi/theme.toml`，无需手动下载 flavor。
+
+- `y` / `y 路径`：打开 Yazi，按 `q` 退出后终端跟随到所在目录；`Q` 退出但不切换目录。
+- `yazi`：直接启动，不改变父 shell 的目录。
+- `h/j/k/l` 导航，空格选择，`~` 查看快捷键帮助。
+- 文件图标需要在 **Windows 终端**中选择 Nerd Font（如 JetBrainsMono Nerd Font）。
+  图片预览效果取决于终端的图像协议支持。
 
 - Windows `.wslconfig` 使用 `networkingMode=mirrored`。
 - 命令行、nix-daemon 和 Docker daemon 使用 `http://127.0.0.1:7890`；先启动 Windows 代理。
