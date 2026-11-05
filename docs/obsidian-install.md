@@ -1,4 +1,4 @@
-# carbon · 保留 Windows 的 NixOS 双系统安装指南
+# obsidian · 保留 Windows 的 NixOS 双系统安装指南
 
 [← 返回首页](../README.md)
 
@@ -6,8 +6,8 @@
 仅使用从 C: 压缩出的约 512 GiB 空间安装 NixOS。
 
 > **当前状态：待安装模板，不是已经完成的实机安装记录。**
-> `carbon` 默认未在 `hosts/default.nix` 启用，Linux 分区 PARTUUID 留空，
-> `hosts/carbon/machine.nix` 中保留阻止误安装的断言。
+> `obsidian` 默认未在 `hosts/default.nix` 启用，Linux 分区 PARTUUID 留空，
+> `hosts/obsidian/machine.nix` 中保留阻止误安装的断言。
 > 本文中的分区路径必须现场填写；显卡、无线网络、引导和挂起唤醒需要实机验证。
 
 ## 目录
@@ -34,7 +34,7 @@
 
 | 项目 | 本仓库的选择 |
 | --- | --- |
-| 主机名 / Flake 目标 | `carbon` / `.#nixosConfigurations.carbon` |
+| 主机名 / Flake 目标 | `obsidian` / `.#nixosConfigurations.obsidian` |
 | 用户 | `uontabc`，UID `1000`，主组 GID `100` |
 | 固件与引导 | UEFI + GRUB；本配置不支持 Secure Boot |
 | 引导主题 | `sleek-grub-theme` 的 `light` 变体，即 Sleek-theme-light |
@@ -83,7 +83,7 @@ GRUB 启用 Windows 自动探测，保留最多 5 个 NixOS 系统代，菜单�
 
 - 不删除、移动、格式化 Windows、ESP、MSR、Recovery 分区。
 - 不把整盘路径填入 `rootPartition`、`bootPartition` 或 `espPartition`。
-- 不使用 nano 的整盘安装模板，也不对 carbon 执行 `nixos-anywhere`。
+- 不使用 umbra 的整盘安装模板，也不对 obsidian 执行 `nixos-anywhere`。
 - 不使用 Disko 的 `destroy`、`destroy,format,mount` 或旧别名 `disko`。
 - `destroy = false` 和分区标签检查只是防误操作措施，**不是数据无损保证**。
 - 中途报错就停止当前阶段，不通过删除断言、清空磁盘或重新格式化来“试一下”。
@@ -93,7 +93,7 @@ GRUB 启用 Windows 自动探测，保留最多 5 个 NixOS 系统代，菜单�
 - 标注 **Windows 管理员 PowerShell**：在 Windows 中执行。
 - 标注 **现有 WSL**：只用于打包配置，不在 WSL 中操作笔记本分区或安装引导器。
 - 第 3～10 节：默认在 **安装 U 盘的 Live 环境 root Bash** 中执行。
-- 第 11～12 节：在 **安装完成后的 carbon** 中执行。
+- 第 11～12 节：在 **安装完成后的 obsidian** 中执行。
 - 命令中的 `实际…`、`REPLACE_WITH_…` 都是占位符，必须替换；不要整段盲目粘贴。
 
 ## 1. 在 Windows 中备份并腾出空间
@@ -172,15 +172,15 @@ powercfg /hibernate off
 cd ~/nixos-config
 git status --short
 git log -1 --oneline
-git archive --format=tar.gz --output="$HOME/carbon-config.tar.gz" HEAD
-sha256sum "$HOME/carbon-config.tar.gz"
+git archive --format=tar.gz --output="$HOME/obsidian-config.tar.gz" HEAD
+sha256sum "$HOME/obsidian-config.tar.gz"
 ```
 
 注意：
 
 - `git archive ... HEAD` **只导出已提交文件**，不包含未提交修改或未跟踪文件。
 - 先确认使用的是你准备安装的提交，归档中必须有 `flake.lock`。
-- 把 `carbon-config.tar.gz` 和校验值保存到 Live 环境能访问的存储，如另一只数据 U 盘。
+- 把 `obsidian-config.tar.gz` 和校验值保存到 Live 环境能访问的存储，如另一只数据 U 盘。
 - 不要往已经制作好的启动盘上随意重新分区；使用其可写数据区或另一存储。
 - 不复制 `~/.ssh`、`~/.pi/agent`、Token、浏览器认证文件或密码文件到仓库。
 
@@ -227,7 +227,7 @@ curl -I https://cache.nixos.org
 把下面路径替换为实际路径：
 
 ```sh
-ARCHIVE='/实际挂载位置/carbon-config.tar.gz'
+ARCHIVE='/实际挂载位置/obsidian-config.tar.gz'
 test -f "$ARCHIVE"
 sha256sum "$ARCHIVE"
 install -d -m 0755 /root/nixos-config
@@ -279,10 +279,10 @@ ls -l /dev/disk/by-id/
 为后面的分区工具设置整盘变量：
 
 ```sh
-CARBON_DISK='/dev/disk/by-id/REPLACE_WITH_VERIFIED_INTERNAL_DISK'
-test -b "$CARBON_DISK"
-lsblk -o NAME,SIZE,TYPE,FSTYPE,PARTLABEL,PARTTYPE,PARTUUID "$CARBON_DISK"
-sfdisk --dump "$CARBON_DISK" > /root/carbon-partitions-before.sfdisk
+OBSIDIAN_DISK='/dev/disk/by-id/REPLACE_WITH_VERIFIED_INTERNAL_DISK'
+test -b "$OBSIDIAN_DISK"
+lsblk -o NAME,SIZE,TYPE,FSTYPE,PARTLABEL,PARTTYPE,PARTUUID "$OBSIDIAN_DISK"
+sfdisk --dump "$OBSIDIAN_DISK" > /root/obsidian-partitions-before.sfdisk
 ```
 
 把分区表记录复制到独立存储。这个文件只是布局记录，**不是数据备份**，也不要在故障时盲目回写。
@@ -300,7 +300,7 @@ sfdisk --dump "$CARBON_DISK" > /root/carbon-partitions-before.sfdisk
 执行：
 
 ```sh
-cfdisk "$CARBON_DISK"
+cfdisk "$OBSIDIAN_DISK"
 ```
 
 在界面中按顺序操作：
@@ -330,7 +330,7 @@ bc13c2ff-59e6-4262-a352-b275fd6f7172
 
 ```sh
 udevadm settle
-lsblk -o NAME,SIZE,TYPE,FSTYPE,PARTLABEL,PARTTYPE,PARTUUID "$CARBON_DISK"
+lsblk -o NAME,SIZE,TYPE,FSTYPE,PARTLABEL,PARTTYPE,PARTUUID "$OBSIDIAN_DISK"
 ```
 
 填写一份记录：
@@ -348,11 +348,11 @@ lsblk -o NAME,SIZE,TYPE,FSTYPE,PARTLABEL,PARTTYPE,PARTUUID "$CARBON_DISK"
 
 ```sh
 ESP_PART='/dev/disk/by-partuuid/实际-Windows-ESP-PARTUUID'
-install -d -m 0755 /run/carbon-esp-check
-mount -o ro "$ESP_PART" /run/carbon-esp-check
-test -f /run/carbon-esp-check/EFI/Microsoft/Boot/bootmgfw.efi \
+install -d -m 0755 /run/obsidian-esp-check
+mount -o ro "$ESP_PART" /run/obsidian-esp-check
+test -f /run/obsidian-esp-check/EFI/Microsoft/Boot/bootmgfw.efi \
   && echo 'Windows EFI 文件存在'
-umount /run/carbon-esp-check
+umount /run/obsidian-esp-check
 ```
 
 文件不存在时先排查是否选错 ESP，不创建、覆盖或格式化它。
@@ -367,7 +367,7 @@ umount /run/carbon-esp-check
 ```sh
 cd /root/nixos-config
 nixos-generate-config --no-filesystems --show-hardware-config \
-  > hosts/carbon/hardware-configuration.nix
+  > hosts/obsidian/hardware-configuration.nix
 ```
 
 查看生成文件，核对 CPU、initrd 存储模块和平台。文件系统统一由 Disko 管理，
@@ -379,7 +379,7 @@ RTX 5060 Laptop（Blackwell）使用 NVIDIA 开源内核模块，驱动使用锁
 若固件提供显卡模式选项，选择独显直连 / dGPU-only，并在 Linux 中确认内屏由 NVIDIA 驱动；
 若内屏实际只能经核显输出，当前单显卡方案可能无法正常显示，需要重新确认硬件路由，不能仅靠配置强制直连。
 
-### 5.2 完成 `hosts/carbon/machine.nix`
+### 5.2 完成 `hosts/obsidian/machine.nix`
 
 核对数据后，将该文件的模板内容替换为如下结构，三个 PARTUUID 全部使用实测值：
 
@@ -398,28 +398,28 @@ RTX 5060 Laptop（Blackwell）使用 NVIDIA 开源内核模块，驱动使用锁
 
 这一步只移除 `machine.nix` 中人为设置的 `assertion = false` 安装保护。
 **不要移除 Disko 的分区检查或 `scripts/reset-btrfs-root.sh` 的保护逻辑。**
-`fleet.storage.laptop` 是角色选项名，不需要改成 `carbon`。
+`fleet.storage.laptop` 是角色选项名，不需要改成 `obsidian`。
 
-### 5.3 在 `hosts/default.nix` 中启用 carbon
+### 5.3 在 `hosts/default.nix` 中启用 obsidian
 
-只取消 carbon 条目的注释，保留现有 graphene，nano 仍保持注释：
+只取消 obsidian 条目的注释，保留现有 onyx，umbra 仍保持注释：
 
 ```nix
-carbon = {
+obsidian = {
   system = "x86_64-linux";
-  modules = [ ./carbon ];
+  modules = [ ./obsidian ];
 };
 ```
 
-保留 `hosts/carbon/default.nix` 中的 `system.stateVersion = "26.05"` 基线。
+保留 `hosts/obsidian/default.nix` 中的 `system.stateVersion = "26.05"` 基线。
 它不是“当前最新版本”，安装后也不要随 nixpkgs 更新而递增。
 
 把新增硬件文件与修改纳入 Git 跟踪，然后审阅差异：
 
 ```sh
-git add hosts/carbon/hardware-configuration.nix hosts/carbon/machine.nix hosts/default.nix
+git add hosts/obsidian/hardware-configuration.nix hosts/obsidian/machine.nix hosts/default.nix
 git diff --cached --stat
-git diff --cached -- hosts/carbon/machine.nix hosts/default.nix
+git diff --cached -- hosts/obsidian/machine.nix hosts/default.nix
 ```
 
 这里的暂存只用于让 Git Flake 看见文件，不要求现在登录 GitHub 或推送。
@@ -429,18 +429,18 @@ git diff --cached -- hosts/carbon/machine.nix hosts/default.nix
 ### 6.1 检查主机名、断言与引导配置
 
 ```sh
-nix eval --raw .#nixosConfigurations.carbon.config.networking.hostName
-nix eval --json .#nixosConfigurations.carbon.config.assertions \
+nix eval --raw .#nixosConfigurations.obsidian.config.networking.hostName
+nix eval --json .#nixosConfigurations.obsidian.config.assertions \
   --apply 'xs: map (x: x.message) (builtins.filter (x: !x.assertion) xs)'
-nix eval --raw .#nixosConfigurations.carbon.config.system.boot.loader.id
-nix eval --raw .#nixosConfigurations.carbon.config.boot.loader.grub.theme
-nix eval --json .#nixosConfigurations.carbon.config.fileSystems \
+nix eval --raw .#nixosConfigurations.obsidian.config.system.boot.loader.id
+nix eval --raw .#nixosConfigurations.obsidian.config.boot.loader.grub.theme
+nix eval --json .#nixosConfigurations.obsidian.config.fileSystems \
   --apply 'fs: builtins.mapAttrs (_: v: { inherit (v) device fsType options; }) fs'
 ```
 
 逐项确认：
 
-- 主机名为 `carbon`，失败断言为 `[]`，引导器 ID 为 `grub`。
+- 主机名为 `obsidian`，失败断言为 `[]`，引导器 ID 为 `grub`。
 - 主题指向 Nix store 中的 `sleek-grub-theme`；本仓库明确选择 `withStyle = "light"`。
 - `/`、`/home`、`/nix`、`/persist` 来自新 Linux root 的不同 Btrfs 子卷。
 - `/boot` 来自新 `NIXOS_BOOT`，`/efi` 来自原 Windows ESP。
@@ -451,7 +451,7 @@ nix eval --json .#nixosConfigurations.carbon.config.fileSystems \
 ### 6.2 检查系统能否求值和需要构建的内容
 
 ```sh
-nix build --dry-run --no-link .#nixosConfigurations.carbon.config.system.build.toplevel
+nix build --dry-run --no-link .#nixosConfigurations.obsidian.config.system.build.toplevel
 ```
 
 这一步不安装系统，也不证明所有构建都会成功；它用于提前发现求值、依赖和下载问题。
@@ -459,7 +459,7 @@ nix build --dry-run --no-link .#nixosConfigurations.carbon.config.system.build.t
 
 ```sh
 # 可选：会下载/构建依赖，占用 Live 环境的存储或内存空间
-nix build --no-link .#nixosConfigurations.carbon.config.system.build.toplevel
+nix build --no-link .#nixosConfigurations.obsidian.config.system.build.toplevel
 ```
 
 Live 环境空间不足时，不要反复尝试把完整桌面构建塞入内存；后续 `nixos-install`
@@ -475,7 +475,7 @@ Live 环境空间不足时，不要反复尝试把完整桌面构建塞入内存
 ### 7.1 先生成脚本，不执行
 
 ```sh
-nix run .#disko -- --mode format,mount --flake .#carbon \
+nix run .#disko -- --mode format,mount --flake .#obsidian \
   --root-mountpoint /mnt --dry-run
 ```
 
@@ -501,7 +501,7 @@ less /nix/store/实际输出的脚本路径
 全部确认后：
 
 ```sh
-nix run .#disko -- --mode format,mount --flake .#carbon --root-mountpoint /mnt
+nix run .#disko -- --mode format,mount --flake .#obsidian --root-mountpoint /mnt
 ```
 
 如果命令失败，先根据错误排查。不要盲目重复，不添加 `--yes-wipe-all-disks`，
@@ -544,7 +544,7 @@ test -f /mnt/efi/EFI/Microsoft/Boot/bootmgfw.efi && echo 'Windows 引导仍在'
 - 根目录重置脚本会检查 `@home`、`@nix`、`@persist` 和非空密码文件；缺失会停止启动。
 
 这是“每次重建根目录”，不是“每次删除所有数据”，也不是备份或磁盘加密。
-白名单以 `hosts/carbon/impermanence.nix` 为准；未声明的根目录数据重启会丢失。
+白名单以 `hosts/obsidian/impermanence.nix` 为准；未声明的根目录数据重启会丢失。
 
 ### 8.2 在安装前绑定用户与 hjem 状态目录
 
@@ -625,7 +625,7 @@ cp -a /root/nixos-config/. /mnt/home/uontabc/nixos-config/
 ### 9.2 执行安装
 
 ```sh
-nixos-install --root /mnt --flake /root/nixos-config#carbon \
+nixos-install --root /mnt --flake /root/nixos-config#obsidian \
   --no-root-password --no-channel-copy
 ```
 
@@ -643,10 +643,10 @@ nixos-install --root /mnt --flake /root/nixos-config#carbon \
 
 ```sh
 chown -R 1000:100 /mnt/home/uontabc
-test -f /mnt/home/uontabc/nixos-config/hosts/carbon/hardware-configuration.nix
+test -f /mnt/home/uontabc/nixos-config/hosts/obsidian/hardware-configuration.nix
 ```
 
-UID `1000` 在 carbon 的持久化配置中已固定，GID `100` 对应默认 `users` 组。
+UID `1000` 在 obsidian 的持久化配置中已固定，GID `100` 对应默认 `users` 组。
 不要把安装介质的 `/root/.ssh` 或其他认证文件顺便复制进目标仓库。
 
 ## 10. 重启前核对 GRUB、Windows 和挂载
@@ -709,7 +709,7 @@ reboot
 在 greetd / tuigreet 使用 `uontabc` 和第 8 节设置的密码登录 Mango。
 登录后用 `Super+Enter` 打开终端。
 
-以下在 **已安装 carbon 的普通用户终端**执行：
+以下在 **已安装 obsidian 的普通用户终端**执行：
 
 ```sh
 hostname
@@ -718,10 +718,10 @@ findmnt -t btrfs,vfat
 systemctl --failed
 sudo journalctl -b -u reset-btrfs-root.service
 cd ~/nixos-config
-nh os build --hostname carbon
+nh os build --hostname obsidian
 ```
 
-预期主机名 `carbon`、UID `1000`，挂载与规划一致；系统构建成功。
+预期主机名 `obsidian`、UID `1000`，挂载与规划一致；系统构建成功。
 initrd 服务日志若未按 unit 筛出，可用 `sudo journalctl -b | rg 'reset-btrfs-root|Recreate'` 查找。
 不要仅凭桌面能打开就跳过挂载和启动日志检查。
 
@@ -796,13 +796,13 @@ manage-bde -status C:
 
 保留并同步以下内容回主仓库：
 
-- `hosts/carbon/hardware-configuration.nix`。
-- 填入真实 PARTUUID、移除模板保护后的 `hosts/carbon/machine.nix`。
-- 已启用 carbon 的 `hosts/default.nix`。
+- `hosts/obsidian/hardware-configuration.nix`。
+- 填入真实 PARTUUID、移除模板保护后的 `hosts/obsidian/machine.nix`。
+- 已启用 obsidian 的 `hosts/default.nix`。
 - 安装过程中确实需要的其他硬件修正。
 
 从归档初始化的 Git 仓库可能没有原历史和远程，**不要直接把它强推覆盖 GitHub**。
-可先将上述文件复制回原有 WSL 克隆，审阅差异后提交；或者在 carbon 完成 GitHub 认证后，
+可先将上述文件复制回原有 WSL 克隆，审阅差异后提交；或者在 obsidian 完成 GitHub 认证后，
 另行克隆远程仓库，再迁入这些文件。
 公钥、私钥、密码哈希与应用 Token 不属于这些配置文件。
 
@@ -813,7 +813,7 @@ cd ~/nixos-config
 # 修改配置后先检查和构建
 nix fmt
 git diff
-nh os build --hostname carbon
+nh os build --hostname obsidian
 # 构建正常后再应用
 rebuild
 ```
@@ -879,30 +879,30 @@ Windows 未被自动发现时，先使用固件 Windows Boot Manager 保持可�
 
 ```sh
 ROOT_PART='/dev/disk/by-partuuid/实际-NIXOS_ROOT-PARTUUID'
-install -d -m 0755 /run/carbon-recovery
-mount -t btrfs -o ro,subvolid=5 "$ROOT_PART" /run/carbon-recovery
-ls /run/carbon-recovery
+install -d -m 0755 /run/obsidian-recovery
+mount -t btrfs -o ro,subvolid=5 "$ROOT_PART" /run/obsidian-recovery
+ls /run/obsidian-recovery
 install -d -m 0755 /root/nixos-config
-cp -a /run/carbon-recovery/@home/uontabc/nixos-config/. /root/nixos-config/
-umount /run/carbon-recovery
+cp -a /run/obsidian-recovery/@home/uontabc/nixos-config/. /root/nixos-config/
+umount /run/obsidian-recovery
 cd /root/nixos-config
 ```
 
 若 `@home`、`@nix`、`@persist` 缺失或读取报错，停止；不要创建新文件系统覆盖原数据。
-重新核对配置中的三个 PARTUUID，并确认 carbon 仍已启用、硬件文件齐全。
+重新核对配置中的三个 PARTUUID，并确认 obsidian 仍已启用、硬件文件齐全。
 
 ### 13.3 只挂载已有系统
 
 先生成并检查 mount 脚本：
 
 ```sh
-nix run .#disko -- --mode mount --flake .#carbon --root-mountpoint /mnt --dry-run
+nix run .#disko -- --mode mount --flake .#obsidian --root-mountpoint /mnt --dry-run
 ```
 
 确认只挂载原有分区后：
 
 ```sh
-nix run .#disko -- --mode mount --flake .#carbon --root-mountpoint /mnt
+nix run .#disko -- --mode mount --flake .#obsidian --root-mountpoint /mnt
 findmnt -R /mnt
 test -f /mnt/efi/EFI/Microsoft/Boot/bootmgfw.efi
 ```
@@ -920,7 +920,7 @@ test -f /mnt/efi/EFI/Microsoft/Boot/bootmgfw.efi
 
 ```sh
 nixos-enter --root /mnt -c \
-  'nixos-rebuild boot --flake /home/uontabc/nixos-config#carbon --install-bootloader'
+  'nixos-rebuild boot --flake /home/uontabc/nixos-config#obsidian --install-bootloader'
 ```
 
 该命令会构建启动配置并重装引导器，不是只读检查；执行前再次确认 `/boot`、`/efi` 的来源。
@@ -934,13 +934,13 @@ nixos-enter --root /mnt -c \
 
 | 文件 | 负责内容 |
 | --- | --- |
-| [`hosts/default.nix`](../hosts/default.nix) | carbon 是否启用 |
-| [`hosts/carbon/machine.nix`](../hosts/carbon/machine.nix) | 分区 PARTUUID、硬件导入、模板安装保护 |
-| [`hosts/carbon/disko.nix`](../hosts/carbon/disko.nix) | 分区级文件系统、挂载和安全断言 |
-| [`hosts/carbon/impermanence.nix`](../hosts/carbon/impermanence.nix) | 根目录重建、持久化白名单、密码文件 |
+| [`hosts/default.nix`](../hosts/default.nix) | obsidian 是否启用 |
+| [`hosts/obsidian/machine.nix`](../hosts/obsidian/machine.nix) | 分区 PARTUUID、硬件导入、模板安装保护 |
+| [`hosts/obsidian/disko.nix`](../hosts/obsidian/disko.nix) | 分区级文件系统、挂载和安全断言 |
+| [`hosts/obsidian/impermanence.nix`](../hosts/obsidian/impermanence.nix) | 根目录重建、持久化白名单、密码文件 |
 | [`modules/profiles/laptop.nix`](../modules/profiles/laptop.nix) | UEFI GRUB、Sleek light、Windows 探测和笔记本基础服务 |
-| [`hosts/carbon/graphics.nix`](../hosts/carbon/graphics.nix) | RTX 5060 Laptop 驱动、独显方案与 32 位图形支持 |
-| [`hosts/carbon/desktop.nix`](../hosts/carbon/desktop.nix) | 桌面、Steam 与 PCManFM |
+| [`hosts/obsidian/graphics.nix`](../hosts/obsidian/graphics.nix) | RTX 5060 Laptop 驱动、独显方案与 32 位图形支持 |
+| [`hosts/obsidian/desktop.nix`](../hosts/obsidian/desktop.nix) | 桌面、Steam 与 PCManFM |
 | [`scripts/check-linux-partition.sh`](../scripts/check-linux-partition.sh) | 拒绝整盘、检查分区名称与 boot 类型 |
 | [`scripts/reset-btrfs-root.sh`](../scripts/reset-btrfs-root.sh) | 启动时检查持久化状态并重建 `@root` |
 

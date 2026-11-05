@@ -10,6 +10,6 @@
         tmux
         btop
       ];
-      # Existing SSH access and account policy are imported by hosts/nano/machine.nix.
+      # Existing SSH access and account policy are imported by hosts/umbra/machine.nix.
     };
 }

@@ -1,18 +1,18 @@
 {
-  graphene = {
+  onyx = {
     system = "x86_64-linux";
-    modules = [ ./graphene ];
+    modules = [ ./onyx ];
   };
 
   # VPS: future full reinstall. Laptop: verified Linux-only partitions.
   # Uncomment only after disk targets, hardware and machine.nix are ready.
-  # nano = {
+  # umbra = {
   #   system = "x86_64-linux"; # or "aarch64-linux"
   #   configRoot = "/etc/nixos"; # location of the repository on the VPS
-  #   modules = [ ./nano ];
+  #   modules = [ ./umbra ];
   # };
-  # carbon = {
+  # obsidian = {
   #   system = "x86_64-linux";
-  #   modules = [ ./carbon ];
+  #   modules = [ ./obsidian ];
   # };
 }

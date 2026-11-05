@@ -22,7 +22,7 @@ let
   };
 in
 {
-  # Imported only by graphene; the desktop keeps its own file manager.
+  # Imported only by onyx; the desktop keeps its own file manager.
   # nixpkgs' wrapper includes preview, archive, search and navigation helpers.
   environment.systemPackages = [ pkgs.yazi ];
 

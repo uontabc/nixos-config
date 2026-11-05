@@ -9,9 +9,9 @@
 
 | 主机 | 用途 | 状态 | 安装与部署 |
 | --- | --- | --- | --- |
-| `graphene` | WSL 开发环境 | 已启用 | [WSL 配置说明](#wsl) |
-| `carbon` | Windows / NixOS 双系统笔记本 | 待安装，清单暂未启用 | [双系统安装指南](docs/carbon-install.md) |
-| `nano` | VPS · VLESS + REALITY + Vision | 重装模板，清单暂未启用 | [部署说明](docs/nano-deploy.md) |
+| `onyx` | WSL 开发环境 | 已启用 | [WSL 配置说明](#wsl) |
+| `obsidian` | Windows / NixOS 双系统笔记本 | 待安装，清单暂未启用 | [双系统安装指南](docs/obsidian-install.md) |
+| `umbra` | VPS · VLESS + REALITY + Vision | 重装模板，清单暂未启用 | [部署说明](docs/umbra-deploy.md) |
 
 主机名、Flake 目标和 `rebuild` 目标保持一致。主机清单位于 `hosts/default.nix`，
 用户身份集中在 `modules/hosts.nix` 的 `identity` 中，当前用户为 `uontabc`。
@@ -25,12 +25,12 @@ cd ~/nixos-config
 # 修改配置；新增文件需先 git add，才能被 Git Flake 读取
 nix fmt
 git diff
-nh os build --hostname graphene    # 只构建；笔记本改为 carbon
+nh os build --hostname onyx    # 只构建；笔记本改为 obsidian
 rebuild                           # 构建并应用当前主机
 ```
 
 `rebuild` 使用主机绑定的仓库路径和目标，普通用户负责构建，激活时通过 sudo 提权。
-也可使用 `nh os switch --hostname graphene`。VPS 的仓库路径由 `configRoot` 指定。
+也可使用 `nh os switch --hostname onyx`。VPS 的仓库路径由 `configRoot` 指定。
 
 | 操作 | 命令 |
 | --- | --- |
@@ -55,10 +55,10 @@ nix develop
 nixos-anywhere --help
 ```
 
-首次安装 nano 的完整准备与命令见 [VPS 部署指南](docs/nano-deploy.md#使用-nixos-anywhere-远程安装)。
-**默认安装会通过 Disko 擦除目标整盘，不用于日常更新，也不要对 carbon 双系统照搬执行。**
-`nano` 仍需核对磁盘、硬件、网络与 SSH 后手动启用；此工具不会绕过安装保护。
-WSL 使用其专用安装方式，carbon 继续使用[保留 Windows 的分区级流程](docs/carbon-install.md)。
+首次安装 umbra 的完整准备与命令见 [VPS 部署指南](docs/umbra-deploy.md#使用-nixos-anywhere-远程安装)。
+**默认安装会通过 Disko 擦除目标整盘，不用于日常更新，也不要对 obsidian 双系统照搬执行。**
+`umbra` 仍需核对磁盘、硬件、网络与 SSH 后手动启用；此工具不会绕过安装保护。
+WSL 使用其专用安装方式，obsidian 继续使用[保留 Windows 的分区级流程](docs/obsidian-install.md)。
 
 ## 目录结构
 
@@ -116,7 +116,7 @@ outputs = inputs:
 flake-parts 外层参数与内层 NixOS 参数是两个作用域，不要混用 `config` / `pkgs`。
 
 `systems` 声明 `x86_64-linux` 和 `aarch64-linux`，安装工具、开发 Shell 与格式化器统一在这两个平台导出。
-这不会自动启用 carbon / nano，也不会改变主机平台或移除安装保护。
+这不会自动启用 obsidian / umbra，也不会改变主机平台或移除安装保护。
 这里只采用 island 的模块组织方式，不引入其 Kix、私有缓存、主机或密钥配置。
 细节参考 [flake-parts 文档](https://flake.parts/module-arguments)和 [import-tree 文档](https://github.com/vic/import-tree)。
 
@@ -240,9 +240,9 @@ LazyVim 和 lazy.nvim 由 Flake 锁定，其余插件锁在 `~/.local/state/nvim
 
 ### 终端分屏与会话
 
-- **WSL（graphene）**：安装 Zellij，执行 `zellij` 手动启动。不自动进入会话，不托管
+- **WSL（onyx）**：安装 Zellij，执行 `zellij` 手动启动。不自动进入会话，不托管
   Zellij 配置；需要时自行配置 `~/.config/zellij/config.kdl`。
-- **笔记本（carbon）**：使用 Ghostty 自带标签页与分屏，不额外安装终端多路复用器。
+- **笔记本（obsidian）**：使用 Ghostty 自带标签页与分屏，不额外安装终端多路复用器。
 - 开发角色不再安装或配置 tmux；VPS 代理角色仍保留 tmux。
 
 Ghostty 的 Linux 默认快捷键：
@@ -278,11 +278,11 @@ GPU 容器运行时未启用，需要另配 NVIDIA Container Toolkit。
 
 ## 桌面与主题
 
-carbon 使用 MangoWM + Noctalia，Ghostty 为终端，Vicinae 为启动器，PCManFM（GTK 3 版）为默认文件管理器。
+obsidian 使用 MangoWM + Noctalia，Ghostty 为终端，Vicinae 为启动器，PCManFM（GTK 3 版）为默认文件管理器。
 PCManFM 配套启用 GVfs（回收站与远程文件访问）和 UDisks2（可移动设备支持），使用自身的缩略图功能。
 PCManFM 只以文件管理模式运行，不启用 `pcmanfm --desktop`。
 共享主题为 Catppuccin Mocha / Mauve，界面字体为 Noto Sans，终端字体为 JetBrainsMono Nerd Font。
-carbon 的 UEFI 引导使用 GRUB，独立采用 sleek-grub-theme 的 light 变体（Sleek-theme-light）。
+obsidian 的 UEFI 引导使用 GRUB，独立采用 sleek-grub-theme 的 light 变体（Sleek-theme-light）。
 游戏环境启用 Steam、RTX 5060 Laptop 的 NVIDIA beta 驱动（开源内核模块）及 32 位 OpenGL / Vulkan 支持，
 按独显直连使用，不配置 PRIME 双显卡切换。Windows 游戏在 Steam「设置 → 兼容性」中启用 Steam Play / Proton；
 具体游戏的兼容性和反作弊限制仍需逐一确认。
@@ -293,10 +293,10 @@ carbon 的 UEFI 引导使用 GRUB，独立采用 sleek-grub-theme 的 light 变�
 | 色板、字体与主题名称 | `lib/theme.nix` |
 | 终端、命令行与编辑器配色 | `home/theme.nix`、`home/nvim/` |
 | 窗口管理与快捷键 | `home/mango/config.conf` |
-| 面板、通知、锁屏、文件管理器、Steam | `hosts/carbon/desktop.nix` |
-| RTX 5060 Laptop beta 驱动与 32 位图形支持 | `hosts/carbon/graphics.nix` |
-| GTK / Qt 外观 | `hosts/carbon/appearance.nix` |
-| 启动器 | `hosts/carbon/vicinae.nix` |
+| 面板、通知、锁屏、文件管理器、Steam | `hosts/obsidian/desktop.nix` |
+| RTX 5060 Laptop beta 驱动与 32 位图形支持 | `hosts/obsidian/graphics.nix` |
+| GTK / Qt 外观 | `hosts/obsidian/appearance.nix` |
+| 启动器 | `hosts/obsidian/vicinae.nix` |
 
 | 快捷键 | 操作 |
 | --- | --- |
@@ -314,9 +314,9 @@ carbon 的 UEFI 引导使用 GRUB，独立采用 sleek-grub-theme 的 light 变�
 
 ## WSL
 
-Windows 中的发行版注册名为 `NixOS`，与 Linux 主机名 `graphene` 不同。
+Windows 中的发行版注册名为 `NixOS`，与 Linux 主机名 `onyx` 不同。
 
-WSL 的终端文件管理器为 Yazi，仅在 `graphene` 启用，配置位于 `home/yazi.nix`。
+WSL 的终端文件管理器为 Yazi，仅在 `onyx` 启用，配置位于 `home/yazi.nix`。
 主题使用 `lib/theme.nix` 的 Catppuccin Mocha 色板和 Mauve 强调色，由 hjem 生成
 `~/.config/yazi/theme.toml`，无需手动下载 flavor。
 

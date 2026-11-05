@@ -1,8 +1,8 @@
-# nano · VPS 部署
+# umbra · VPS 部署
 
 [← 返回首页](../README.md)
 
-用于 VLESS + REALITY + Vision 代理节点，配置入口为 `hosts/nano/`。
+用于 VLESS + REALITY + Vision 代理节点，配置入口为 `hosts/umbra/`。
 当前是**未来整盘重装模板**，主机清单未启用，不用于原地转换现有系统。
 
 ## 安装前检查
@@ -13,20 +13,20 @@
 启用前完成以下事项：
 
 1. 确认 CPU 架构，在 `hosts/default.nix` 中选择 `x86_64-linux` 或 `aarch64-linux`。
-2. 在 `hosts/nano/machine.nix` 填写 `fleet.storage.vps.disk`，使用现场确认的整盘 by-id 路径。
+2. 在 `hosts/umbra/machine.nix` 填写 `fleet.storage.vps.disk`，使用现场确认的整盘 by-id 路径。
 3. 填写 `firmware = "uefi"` 或 `"bios"`；BIOS 模板仅适用于 x86。
 4. 导入云平台硬件与网络配置，声明 SSH 服务、登录账号和公钥。
 5. 为新安装设置 `system.stateVersion`，确认目标上的仓库位置 `configRoot`。
-6. 完成核对后移除 `machine.nix` 中人为的安装保护，取消 nano 清单注释。
+6. 完成核对后移除 `machine.nix` 中人为的安装保护，取消 umbra 清单注释。
 
 布局为未加密 ext4 根分区：UEFI 增加 1 GiB ESP，BIOS 增加 1 MiB BIOS boot 分区。
 UEFI 使用 GRUB removable 路径，不依赖可写 NVRAM。
-不能照搬 carbon 的分区级流程；核对配置后可从本地通过以下 nixos-anywhere 流程安装。
+不能照搬 obsidian 的分区级流程；核对配置后可从本地通过以下 nixos-anywhere 流程安装。
 
 ## 使用 nixos-anywhere 远程安装
 
 > **以下安装命令会擦除 `fleet.storage.vps.disk` 指定的整盘，并重启 VPS。**
-> 仅用于已备份、允许整盘重装的 nano；不要用于 carbon、WSL 或日常更新。
+> 仅用于已备份、允许整盘重装的 umbra；不要用于 obsidian、WSL 或日常更新。
 > 保留云平台控制台 / 救援入口，以便修复网络或引导失败。
 
 ### 准备配置和连接
@@ -60,22 +60,22 @@ users.users.root.openssh.authorizedKeys.keys = [ "替换为你的完整 SSH 公�
 
 只将公钥写入配置，私钥留在本地。若不允许 root 登录，应改配普通用户、相应公钥与 sudo 策略。
 不要依赖救援系统的临时 IP 配置自动保留；按云平台要求声明 DHCP / 静态地址、网关与 DNS，
-并确认云防火墙放行 SSH。硬件文件应来自真实目标或云平台模块，不要复制 graphene 的配置。
+并确认云防火墙放行 SSH。硬件文件应来自真实目标或云平台模块，不要复制 onyx 的配置。
 
-取消 nano 清单注释、移除人为安装保护后，在本地仓库预检：
+取消 umbra 清单注释、移除人为安装保护后，在本地仓库预检：
 
 ```sh
 cd ~/nixos-config
 # 先检查没有私钥等秘密，再暂存新增的主机配置，供 Git Flake 读取
-git add hosts/nano hosts/default.nix
-nix eval --raw .#nixosConfigurations.nano.config.networking.hostName
-nix eval --json .#nixosConfigurations.nano.config.assertions \
+git add hosts/umbra hosts/default.nix
+nix eval --raw .#nixosConfigurations.umbra.config.networking.hostName
+nix eval --json .#nixosConfigurations.umbra.config.assertions \
   --apply 'xs: map (x: x.message) (builtins.filter (x: !x.assertion) xs)'
 nix run .#nixos-anywhere -- --help
 ```
 
-预期主机名为 `nano`、失败断言为 `[]`。硬件配置应已就绪并被导入。
-本地与 VPS 同架构时，建议先执行 `nix build --no-link .#nixosConfigurations.nano.config.system.build.toplevel`；
+预期主机名为 `umbra`、失败断言为 `[]`。硬件配置应已就绪并被导入。
+本地与 VPS 同架构时，建议先执行 `nix build --no-link .#nixosConfigurations.umbra.config.system.build.toplevel`；
 需要原生构建器或模拟器的跨架构构建不能仅靠修改 `system` 完成。
 
 ### 执行首次安装
@@ -84,7 +84,7 @@ nix run .#nixos-anywhere -- --help
 
 ```sh
 nix run .#nixos-anywhere -- \
-  --flake .#nano \
+  --flake .#umbra \
   --target-host root@VPS_IP \
   -i ~/.ssh/id_ed25519
 ```
@@ -117,7 +117,7 @@ tar --exclude='./.git' -czf - . | \
 
 ## REALITY 凭据
 
-修改 `hosts/nano/proxy.nix` 设置监听端口、握手域名和凭据目录：
+修改 `hosts/umbra/proxy.nix` 设置监听端口、握手域名和凭据目录：
 
 | 项目 | 默认值 |
 | --- | --- |
@@ -143,11 +143,11 @@ REALITY 公钥、short ID 与 `xtls-rprx-vision`；**私钥仅留在 VPS**。
 
 ## 安装后的更新
 
-以下命令用于已安装、SSH 可达的 nano，**不会执行 Disko，也不会同步仓库**：
+以下命令用于已安装、SSH 可达的 umbra，**不会执行 Disko，也不会同步仓库**：
 
 ```sh
-nixos-rebuild build --flake .#nano
-nixos-rebuild switch --flake .#nano --target-host USER@VPS_IP --sudo
+nixos-rebuild build --flake .#umbra
+nixos-rebuild switch --flake .#umbra --target-host USER@VPS_IP --sudo
 ```
 
 跨架构构建可增加 `--build-host USER@VPS_IP`。若在远端直接运行 `rebuild`，
