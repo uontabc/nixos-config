@@ -43,6 +43,18 @@ rebuild                           # 构建并应用当前主机
 - 默认每周清理超过 30 天的旧代；回滚不恢复个人文件，也不能替代备份。
 - 日常 rebuild **不会执行 Disko 分区或格式化**。
 
+## 安装路线
+
+先按目标设备选择，**不要混用安装命令**：
+
+| 目标 | 从哪里开始 | 是否会格式化磁盘 |
+| --- | --- | --- |
+| `onyx` WSL | 按 [NixOS-WSL 官方安装文档](https://nix-community.github.io/NixOS-WSL/install.html)准备发行版，再用本仓库的 `onyx` 配置构建和切换；[查看 WSL 配置](#wsl) | 不使用本仓库的 Disko 安装流程；WSL 发行版本身的创建和删除请遵循官方说明 |
+| `obsidian` 双系统 | [笔记本安装指南](docs/obsidian-install.md)：先备份 Windows，再从 Live 环境按阶段操作 | 首次安装会格式化确认过的新 Linux 分区；必须保留 Windows 分区与 ESP |
+| `umbra` VPS | [VPS 部署指南](docs/umbra-deploy.md)：先备份并核对云平台配置 | 首次远程安装会擦除指定的整盘 |
+
+已安装的旧 WSL 主机 `graphene` 迁移到 `onyx` 时，无需重新安装发行版：拉取本仓库更新后在仓库目录执行 `nh os build --hostname onyx`，构建成功再执行 `nh os switch --hostname onyx`。切换后用 `hostname` 检查；如需重启 WSL，先保存工作，再按 [WSL 小节](#wsl)操作。Windows 的发行版注册名仍是 `NixOS`。
+
 ## 远程安装
 
 仓库提供由 `flake.lock` 中 nixpkgs 锁定的 `nixos-anywhere`，无需全局安装：
