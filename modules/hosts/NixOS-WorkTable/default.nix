@@ -6,6 +6,7 @@
       {
         config,
         inputs,
+        lib,
         pkgs,
         ...
       }:
@@ -24,6 +25,22 @@
         # Use the upstream's matching patched ZFS, not stock ZFS (which marks
         # this newer kernel unsupported). Userland and module stay in sync.
         boot.zfs.package = config.boot.kernelPackages.zfs_cachyos;
+
+        # On this kernel/ZFS stack, ProtectHome=true fails to mask /home with
+        # 226/NAMESPACE. A read-only tmpfs still hides home directories without
+        # disabling the rest of each service's sandbox (already used by logind).
+        systemd.services = lib.genAttrs [
+          "bluetooth"
+          "polkit"
+          "power-profiles-daemon"
+          "systemd-logind"
+          "systemd-oomd"
+          "systemd-timesyncd"
+          "upower"
+        ] (_: {
+          serviceConfig.ProtectHome = "tmpfs";
+        });
+
         nix.settings = {
           # 32 logical CPUs but only 16 GiB RAM: avoid multiplying heavy build jobs.
           max-jobs = 1;

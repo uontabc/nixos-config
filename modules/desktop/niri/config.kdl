@@ -65,6 +65,9 @@ layout {
     shadow { off; }
 }
 
+// Noctalia owns colors only; the optional include is safe before its first generation.
+include optional=true "noctalia.kdl"
+
 // Noctalia renders a separate wallpaper copy for the space behind overview workspaces.
 // Keep the normal wallpaper in each workspace; only the backdrop belongs here.
 layer-rule {

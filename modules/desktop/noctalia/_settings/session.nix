@@ -22,13 +22,17 @@
   };
   plugins = {
     auto_update = "all";
-    enabled = [ "raycursive/niri-displays" ];
+    enabled = [
+      "raycursive/niri-displays"
+      "noctalia/bongocat"
+    ];
   };
   plugin_settings."raycursive/niri-displays" = {
     # The panel may make temporary changes; Nix owns persistent output defaults.
     scale_presets = [ ];
-    panel_layer = "overlay";
+    panel_layer = "top";
     panel_placement = "floating";
+    panel_position = "center";
   };
   idle.behavior = {
     lock = {

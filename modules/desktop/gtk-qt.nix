@@ -1,6 +1,7 @@
 {
   flake.modules.nixos.gtk-qt =
     {
+      config,
       identity,
       lib,
       pkgs,
@@ -14,29 +15,25 @@
         themeVariants = [ "default" ];
         iconVariants = [ "Dark" ];
       };
-      # The GTK package does not ship a Qt theme. Pin the matching Kvantum assets.
-      kvantum = pkgs.fetchFromGitHub {
-        owner = "0xsch1zo";
-        repo = "Kvantum-Tokyo-Night";
-        rev = "b1e6b0925ba15784ea4b344d734564e9357cbd86";
-        hash = "sha256-fmYGEeK1RND8RpVM5QFgruql3lCs50LBXVApXqgwzzk=";
-      };
+      configHome = config.hjem.users.${identity.username}.xdg.config.directory;
       cursorSettings = ''
         [Icon Theme]
         Inherits=${theme.cursorName}
       '';
       gtkSettings = ''
         [Settings]
-        gtk-theme-name=${theme.gtkName}
+        gtk-theme-name=adw-gtk3-dark
         gtk-icon-theme-name=${theme.icons}
         gtk-font-name=${theme.fonts.sans} ${toString theme.fonts.size}
         gtk-cursor-theme-name=${theme.cursorName}
         gtk-cursor-theme-size=${toString theme.cursorSize}
         gtk-application-prefer-dark-theme=true
       '';
-      qtSettings = ''
+      qtSettings = qtVersion: ''
         [Appearance]
-        style=kvantum
+        style=Fusion
+        custom_palette=true
+        color_scheme_path=${configHome}/qt${qtVersion}ct/colors/noctalia.conf
         icon_theme=${theme.icons}
         [Fonts]
         general="${theme.fonts.sans},${toString theme.fonts.size},-1,5,50,0,0,0,0,0"
@@ -48,11 +45,10 @@
         enable = true;
         profiles.user.databases = [
           {
-            # Only these theme/font keys are locked; other preferences stay writable.
+            # Keep fonts/icons/cursor fixed; Noctalia may select the GTK theme.
             lockAll = true;
             settings."org/gnome/desktop/interface" = {
               color-scheme = "prefer-dark";
-              gtk-theme = theme.gtkName;
               icon-theme = theme.icons;
               cursor-theme = theme.cursorName;
               cursor-size = lib.gvariant.mkInt32 theme.cursorSize;
@@ -66,10 +62,10 @@
       qt = {
         enable = true;
         platformTheme = "qt5ct";
-        style = "kvantum";
       };
       environment.systemPackages = [
-        gtk
+        gtk # GTK 2 fallback; GTK 3/4 colors come from Noctalia.
+        pkgs.adw-gtk3
         pkgs.tela-icon-theme
         pkgs.bibata-cursors
         pkgs.xdg-terminal-exec
@@ -94,11 +90,11 @@
         xdg.config.files = {
           "gtk-3.0/settings.ini".text = gtkSettings;
           "gtk-4.0/settings.ini".text = gtkSettings;
-          "gtk-4.0/gtk.css".text = ''@import url("${gtk}/share/themes/${theme.gtkName}/gtk-4.0/gtk.css");'';
-          "Kvantum/kvantum.kvconfig".text = "[General]\ntheme=${theme.kvantumName}\n";
-          "Kvantum/${theme.kvantumName}".source = "${kvantum}/${theme.kvantumName}";
-          "qt5ct/qt5ct.conf".text = qtSettings;
-          "qt6ct/qt6ct.conf".text = qtSettings;
+          # Import generated colors without letting hooks replace Nix-managed files.
+          "gtk-3.0/gtk.css".text = ''@import url("noctalia.css");'';
+          "gtk-4.0/gtk.css".text = ''@import url("noctalia.css");'';
+          "qt5ct/qt5ct.conf".text = qtSettings "5";
+          "qt6ct/qt6ct.conf".text = qtSettings "6";
           "xdg-terminals.list".text = "kitty.desktop\n";
         };
       };

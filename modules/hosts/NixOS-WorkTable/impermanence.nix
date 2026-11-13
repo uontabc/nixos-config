@@ -64,7 +64,7 @@
         users.mutableUsers = false;
         users.users.${identity.username} = {
           uid = 1000;
-          hashedPasswordFile = "/persist/secrets/${identity.username}-password";
+          hashedPasswordFile = "/persist/secrets/password";
         };
       };
     };

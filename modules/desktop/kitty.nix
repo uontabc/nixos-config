@@ -1,9 +1,18 @@
 {
   flake.modules.nixos.kitty =
-    { identity, lib, ... }:
+    {
+      config,
+      identity,
+      lib,
+      ...
+    }:
     let
       theme = import ../../lib/theme.nix;
       c = theme.colors;
+      templates =
+        config.hjem.users.${identity.username}.programs.noctalia.settings.theme.templates or { };
+      useNoctaliaTheme =
+        (templates.enable_builtin_templates or false) && lib.elem "kitty" (templates.builtin_ids or [ ]);
       # Tokyo Night's terminal ANSI palette (night variant).
       ansi = with c; [
         mantle
@@ -26,8 +35,13 @@
     in
     {
       hjem.users.${identity.username}.xdg.config.files = {
+        # The built-in hook touches kitty.conf even when the include already exists.
+        "kitty/kitty.conf".type = lib.mkIf useNoctaliaTheme "copy";
+        "kitty/kitty.conf".clobber = lib.mkIf useNoctaliaTheme true;
+        "kitty/kitty.conf".permissions = lib.mkIf useNoctaliaTheme "0600";
         "kitty/kitty.conf".text = ''
           include themes/${theme.name}.conf
+          ${lib.optionalString useNoctaliaTheme "include themes/noctalia.conf"}
           font_family ${theme.fonts.mono}
           font_size ${toString (theme.fonts.size + 1)}
           # Recursive is unpatched; render Nerd Font private-use icons separately.

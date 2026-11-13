@@ -8,14 +8,16 @@
     community_palette = "Oxocarbon";
     wallpaper_scheme = "m3-content";
     templates = {
-      # No compositor-specific template; Nix owns application themes.
+      # Match the installed desktop; Nix owns integration, Noctalia owns colors.
       builtin_ids = [
+        "btop"
         "gtk3"
         "gtk4"
         "kitty"
+        "niri"
         "qt"
       ];
-      enable_builtin_templates = false;
+      enable_builtin_templates = true;
       enable_community_templates = false;
     };
   };
@@ -71,11 +73,12 @@
   };
   wallpaper = {
     enabled = true;
-    fill_mode = "fit";
+    directory = "/home/${identity.username}/Pictures";
+    fill_mode = "stretch";
     transition_on_startup = true;
-    default.path = "/home/${identity.username}/Pictures/wallhaven-j5zmyw_3840x2400.png";
-    last.path = "/home/${identity.username}/Pictures/wallhaven-j5zmyw_3840x2400.png";
-    monitors.eDP-1.path = "/home/${identity.username}/Pictures/wallhaven-j5zmyw_3840x2400.png";
+    default.path = "/home/${identity.username}/Pictures/file_00000000ad5c81fdb4c4b8b5650399cc.png";
+    last.path = "/home/${identity.username}/Pictures/file_00000000ad5c81fdb4c4b8b5650399cc.png";
+    monitors.eDP-1.path = "/home/${identity.username}/Pictures/file_00000000ad5c81fdb4c4b8b5650399cc.png";
   };
   # Separate overview wallpaper, following the current GUI-selected image.
   backdrop = {
