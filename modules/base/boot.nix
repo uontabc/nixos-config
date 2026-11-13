@@ -43,10 +43,10 @@
           enable = true;
           efiSupport = true;
           device = "nodev";
-          # Keep kernels and initrds on /boot, not the small shared Windows ESP.
+          # Keep kernels and initrds on the separate ext4 /boot, outside ZFS.
           copyKernels = true;
           configurationLimit = 5;
-          useOSProber = true;
+          useOSProber = false;
           theme = grubTheme;
         };
         efi = {
@@ -56,8 +56,8 @@
         timeout = 5;
       };
 
-      # Match the existing Windows local-time RTC convention for dual boot.
-      time.hardwareClockInLocalTime = true;
+      # NixOS is the only OS on this disk; keep the hardware clock in UTC.
+      time.hardwareClockInLocalTime = false;
       networking.networkmanager.enable = true;
       users.users.${identity.username}.extraGroups = [ "networkmanager" ];
 

@@ -5,45 +5,34 @@
       inputs,
       identity,
       lib,
-      pkgs,
-      utils,
       ...
     }:
     let
       cfg = config.fleet.storage.laptop;
-      ready = cfg.rootPartition != null && cfg.bootPartition != null && cfg.espPartition != null;
+      ready = cfg.disk != null;
     in
     {
       imports = [ inputs.impermanence.nixosModules.impermanence ];
 
       config = lib.mkIf ready {
         boot.initrd.systemd = {
-          storePaths = [ "${../../../scripts/reset-btrfs-root.sh}" ];
-          services.reset-btrfs-root = {
-            description = "Recreate only the ephemeral Btrfs root subvolume";
+          services.rollback-root = {
+            description = "Roll back the ephemeral ZFS root dataset";
             requiredBy = [ "sysroot.mount" ];
             before = [ "sysroot.mount" ];
-            requires = [ "${utils.escapeSystemdPath cfg.rootPartition}.device" ];
-            after = [
-              "${utils.escapeSystemdPath cfg.rootPartition}.device"
-              "local-fs-pre.target"
-            ];
+            requires = [ "zfs-import-rpool.service" ];
+            after = [ "zfs-import-rpool.service" ];
             unitConfig.DefaultDependencies = false;
-            serviceConfig.Type = "oneshot";
-            path = with pkgs; [
-              bash
-              btrfs-progs
-              util-linux
-              coreutils
-            ];
-            script = ''
-              exec ${pkgs.bash}/bin/bash ${../../../scripts/reset-btrfs-root.sh} \
-                ${lib.escapeShellArg cfg.rootPartition} ${lib.escapeShellArg identity.username}
-            '';
+            serviceConfig = {
+              Type = "oneshot";
+              # No recursive/force flags: only root is reset; unexpected newer
+              # snapshots stop boot rather than being destroyed automatically.
+              ExecStart = "${config.boot.zfs.package}/bin/zfs rollback rpool/root@blank";
+            };
           };
         };
 
-        # The entire /home and /nix are separate persistent subvolumes, not binds.
+        # The entire /home and /nix are separate persistent datasets, not binds.
         environment.persistence."/persist" = {
           hideMounts = true;
           directories = [

@@ -1,41 +1,15 @@
 {
   flake.modules.nixos.obsidian =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+    { config, lib, ... }:
     let
       cfg = config.fleet.storage.laptop;
-      ready = cfg.rootPartition != null && cfg.bootPartition != null && cfg.espPartition != null;
-      partition = lib.types.nullOr lib.types.str;
-      mountOptions = [
-        "compress=zstd:3"
-        "noatime"
-      ];
-      check = device: label: fs: ''
-        ${pkgs.bash}/bin/bash ${../../../scripts/check-linux-partition.sh} \
-          ${lib.escapeShellArg device} ${label} ${fs}
-      '';
+      ready = cfg.disk != null;
     in
     {
-      options.fleet.storage.laptop = {
-        rootPartition = lib.mkOption {
-          type = partition;
-          default = null;
-          description = "PARTUUID path of the new NIXOS_ROOT partition, never the whole Windows disk.";
-        };
-        bootPartition = lib.mkOption {
-          type = partition;
-          default = null;
-          description = "PARTUUID path of the new 1 GiB NIXOS_BOOT XBOOTLDR partition.";
-        };
-        espPartition = lib.mkOption {
-          type = partition;
-          default = null;
-          description = "PARTUUID path of the existing Windows EFI partition; mounted without formatting.";
-        };
+      options.fleet.storage.laptop.disk = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Whole disk to ERASE for the ZFS reinstall; use its verified /dev/disk/by-id path.";
       };
 
       config = lib.mkMerge [
@@ -43,80 +17,113 @@
           assertions = [
             {
               assertion = ready;
-              message = "Laptop disko: fill rootPartition, bootPartition and espPartition after preparing the Linux-only area in the Windows disk's free space.";
+              message = "Laptop disko: set fleet.storage.laptop.disk to the verified whole disk. All partitions, including Windows and the current NixOS installation, will be erased.";
             }
             {
               assertion =
                 !ready
                 || (
-                  builtins.all (p: lib.hasPrefix "/dev/disk/by-partuuid/" p) [
-                    cfg.rootPartition
-                    cfg.bootPartition
-                    cfg.espPartition
-                  ]
-                  &&
-                    builtins.length (
-                      lib.unique [
-                        cfg.rootPartition
-                        cfg.bootPartition
-                        cfg.espPartition
-                      ]
-                    ) == 3
+                  lib.hasPrefix "/dev/disk/by-id/" cfg.disk
+                  && builtins.match "/dev/disk/by-id/[^/]+" cfg.disk != null
+                  && builtins.match ".*-part[0-9]+" cfg.disk == null
                 );
-              message = "Laptop disko requires three different partition PARTUUID paths; whole-disk paths are not accepted.";
+              message = "Laptop disko requires a whole-disk /dev/disk/by-id path, not a partition path.";
             }
           ];
         }
         (lib.mkIf ready {
-          # No GPT/table node: this configuration never repartitions the Windows disk.
           disko.devices = {
-            disk = {
-              linuxRoot = {
-                type = "disk";
-                device = cfg.rootPartition;
-                destroy = false;
-                content = {
-                  type = "btrfs";
-                  preCreateHook = check cfg.rootPartition "NIXOS_ROOT" "btrfs";
-                  subvolumes = {
-                    "@root" = {
-                      mountpoint = "/";
-                      inherit mountOptions;
+            disk.system = {
+              type = "disk";
+              device = cfg.disk;
+              content = {
+                type = "gpt";
+                partitions = {
+                  ESP = {
+                    priority = 1;
+                    size = "1G";
+                    type = "EF00";
+                    content = {
+                      type = "filesystem";
+                      format = "vfat";
+                      mountpoint = "/efi";
+                      mountOptions = [ "umask=0077" ];
                     };
-                    "@home" = {
-                      mountpoint = "/home";
-                      inherit mountOptions;
+                  };
+                  boot = {
+                    priority = 2;
+                    size = "2G";
+                    content = {
+                      type = "filesystem";
+                      format = "ext4";
+                      mountpoint = "/boot";
                     };
-                    "@nix" = {
-                      mountpoint = "/nix";
-                      inherit mountOptions;
-                    };
-                    "@persist" = {
-                      mountpoint = "/persist";
-                      inherit mountOptions;
+                  };
+                  zfs = {
+                    priority = 3;
+                    size = "100%";
+                    type = "BF01";
+                    content = {
+                      type = "zfs";
+                      pool = "rpool";
                     };
                   };
                 };
               };
-              linuxBoot = {
-                type = "disk";
-                device = cfg.bootPartition;
-                destroy = false;
-                content = {
-                  type = "filesystem";
-                  format = "vfat";
-                  mountpoint = "/boot";
-                  mountOptions = [ "umask=0077" ];
-                  preCreateHook = check cfg.bootPartition "NIXOS_BOOT" "vfat";
+            };
+            zpool.rpool = {
+              type = "zpool";
+              options = {
+                ashift = "12";
+                autotrim = "on";
+                cachefile = "none";
+              };
+              rootFsOptions = {
+                mountpoint = "none";
+                compression = "zstd";
+                atime = "off";
+                acltype = "posixacl";
+                xattr = "sa";
+                "com.sun:auto-snapshot" = "false";
+              };
+              # Siblings, not children of root: rolling back root must never
+              # affect home, the Nix store, or the impermanence state.
+              datasets = {
+                root = {
+                  type = "zfs_fs";
+                  mountpoint = "/";
+                  options.mountpoint = "legacy";
+                  postCreateHook = ''
+                    if ! zfs list -H -t snapshot -o name rpool/root@blank >/dev/null 2>&1; then
+                      zfs snapshot rpool/root@blank
+                    fi
+                  '';
+                };
+                home = {
+                  type = "zfs_fs";
+                  mountpoint = "/home";
+                  options.mountpoint = "legacy";
+                };
+                nix = {
+                  type = "zfs_fs";
+                  mountpoint = "/nix";
+                  options.mountpoint = "legacy";
+                };
+                persist = {
+                  type = "zfs_fs";
+                  mountpoint = "/persist";
+                  options.mountpoint = "legacy";
                 };
               };
             };
-            # nodev generates mounts, with no create/format operation for this device.
-            nodev."/efi" = {
-              device = cfg.espPartition;
-              fsType = "vfat";
-              mountOptions = [ "umask=0077" ];
-            };
+          };
+
+          boot.initrd.availableKernelModules = [ "nvme" ];
+          boot.supportedFilesystems = [ "zfs" ];
+          boot.zfs.forceImportRoot = false;
+          services.zfs.autoScrub = {
+            enable = true;
+            pools = [ "rpool" ];
           };
           fileSystems."/home".neededForBoot = true;
           fileSystems."/nix".neededForBoot = true;

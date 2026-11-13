@@ -4,6 +4,7 @@
     system = "x86_64-linux";
     module =
       {
+        config,
         inputs,
         pkgs,
         ...
@@ -20,6 +21,9 @@
         # NVIDIA's modules in graphics.nix are built against this same kernel set.
         nixpkgs.overlays = [ inputs.nix-cachyos-kernel.overlays.pinned ];
         boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
+        # Use the upstream's matching patched ZFS, not stock ZFS (which marks
+        # this newer kernel unsupported). Userland and module stay in sync.
+        boot.zfs.package = config.boot.kernelPackages.zfs_cachyos;
         nix.settings = {
           # 32 logical CPUs but only 16 GiB RAM: avoid multiplying heavy build jobs.
           max-jobs = 1;
