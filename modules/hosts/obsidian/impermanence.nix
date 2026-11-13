@@ -65,7 +65,8 @@
               directory = "/var/lib/bluetooth";
               mode = "0700";
             }
-          ];
+          ]
+          ++ lib.optional config.virtualisation.libvirtd.enable "/var/lib/libvirt";
           files = [ "/etc/machine-id" ];
         };
 
