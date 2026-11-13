@@ -38,28 +38,9 @@ nix run .#disko -- --mode destroy,format,mount --flake .#NixOS-WorkTable
 ```
 
 自动挂载到 `/mnt`：1 GiB EFI、2 GiB ext4 `/boot`，其余为 ZFS。
+本机驱动已预置在仓库中，不需要再生成硬件配置、编辑 imports 或执行 git add。
 
-## 3. 导入本机硬件配置
-
-```sh
-nixos-generate-config --root /mnt --no-filesystems --show-hardware-config \
-  > modules/hosts/NixOS-WorkTable/_hardware-configuration.nix
-nano modules/hosts/NixOS-WorkTable/machine.nix
-```
-
-取消这一行的注释：
-
-```nix
-imports = [ ./_hardware-configuration.nix ];
-```
-
-将硬件配置加入 Git，避免 flake 忽略新文件：
-
-```sh
-git add modules/hosts/NixOS-WorkTable/_hardware-configuration.nix modules/hosts/NixOS-WorkTable/machine.nix
-```
-
-## 4. 设置登录密码
+## 3. 设置登录密码
 
 ```sh
 install -d -m 0700 /mnt/persist/secrets
@@ -68,7 +49,7 @@ install -d -m 0700 /mnt/persist/secrets
 
 按提示输入 **uontabc 的登录密码**。密码哈希只保存在 `/persist`，不要提交到 Git。
 
-## 5. 安装并重启
+## 4. 安装并重启
 
 ```sh
 install -d /mnt/home/uontabc
