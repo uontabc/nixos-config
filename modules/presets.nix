@@ -45,7 +45,7 @@
         tmux
         btop
       ];
-      # SSH access and account policy belong to modules/hosts/umbra/machine.nix.
+      # SSH access and account policy belong to modules/hosts/NixOS-WorkCloud/machine.nix.
     };
   };
 }

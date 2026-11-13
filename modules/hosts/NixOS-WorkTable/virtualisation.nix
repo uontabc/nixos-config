@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.obsidian =
+  flake.modules.nixos."NixOS-WorkTable" =
     {
       config,
       identity,

@@ -1,6 +1,6 @@
 { self, ... }:
 {
-  hosts.obsidian = {
+  hosts."NixOS-WorkTable" = {
     system = "x86_64-linux";
     module =
       {

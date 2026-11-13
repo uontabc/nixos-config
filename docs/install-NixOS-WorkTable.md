@@ -1,4 +1,4 @@
-# Obsidian 本机重装
+# NixOS-WorkTable 本机重装
 
 > **会清空整块 1 TB NVMe，包括 Windows 和当前 NixOS。**
 > 先将个人数据备份到其他磁盘或远端，并把本次 ZFS 配置提交、推送到仓库。
@@ -30,11 +30,11 @@ lsblk -o NAME,SIZE,MODEL,FSTYPE,MOUNTPOINTS
 readlink -f /dev/disk/by-id/nvme-eui.5cdfb804b1a00b01
 ```
 
-确认这是要清空的 UMIS NVMe；不一致就先修改 `modules/hosts/obsidian/machine.nix` 的 `disk`。
+确认这是要清空的 UMIS NVMe；不一致就先修改 `modules/hosts/NixOS-WorkTable/machine.nix` 的 `disk`。
 **下面这条命令开始清盘，只执行一次：**
 
 ```sh
-nix run .#disko -- --mode destroy,format,mount --flake .#obsidian
+nix run .#disko -- --mode destroy,format,mount --flake .#NixOS-WorkTable
 ```
 
 自动挂载到 `/mnt`：1 GiB EFI、2 GiB ext4 `/boot`，其余为 ZFS。
@@ -43,8 +43,8 @@ nix run .#disko -- --mode destroy,format,mount --flake .#obsidian
 
 ```sh
 nixos-generate-config --root /mnt --no-filesystems --show-hardware-config \
-  > modules/hosts/obsidian/_hardware-configuration.nix
-nano modules/hosts/obsidian/machine.nix
+  > modules/hosts/NixOS-WorkTable/_hardware-configuration.nix
+nano modules/hosts/NixOS-WorkTable/machine.nix
 ```
 
 取消这一行的注释：
@@ -56,7 +56,7 @@ imports = [ ./_hardware-configuration.nix ];
 将硬件配置加入 Git，避免 flake 忽略新文件：
 
 ```sh
-git add modules/hosts/obsidian/_hardware-configuration.nix modules/hosts/obsidian/machine.nix
+git add modules/hosts/NixOS-WorkTable/_hardware-configuration.nix modules/hosts/NixOS-WorkTable/machine.nix
 ```
 
 ## 4. 设置登录密码
@@ -73,7 +73,7 @@ install -d -m 0700 /mnt/persist/secrets
 ```sh
 install -d /mnt/home/uontabc
 cp -a /tmp/nixos-config /mnt/home/uontabc/nixos-config
-nixos-install --flake /mnt/home/uontabc/nixos-config#obsidian --no-root-passwd
+nixos-install --flake /mnt/home/uontabc/nixos-config#NixOS-WorkTable --no-root-passwd
 chown -R 1000:100 /mnt/home/uontabc
 ```
 
@@ -81,14 +81,14 @@ chown -R 1000:100 /mnt/home/uontabc
 
 ```sh
 umount -R /mnt
-zpool export rpool
+zpool export ontario
 reboot
 ```
 
 拔掉安装 U 盘，以 `uontabc` 登录。
 
 根目录每次开机回滚；`/home`、`/nix`、`/persist` 保留。安装时已自动创建空白快照，
-不需要手动创建，也不要删除 `rpool/root@blank`。
+不需要手动创建，也不要删除 `ontario/root@blank`。
 
 以后更新配置：
 

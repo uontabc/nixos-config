@@ -8,10 +8,10 @@
       ...
     }:
     let
-      cfg = config.fleet.reality;
+      cfg = config.services.sing-box-reality;
     in
     {
-      options.fleet.reality = {
+      options.services.sing-box-reality = {
         enable = lib.mkEnableOption "the VLESS + REALITY proxy node";
         port = lib.mkOption {
           type = lib.types.port;

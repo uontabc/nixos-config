@@ -4,7 +4,7 @@
   lib,
 }:
 buildNpmPackage {
-  pname = "fleet-pi-lsp";
+  pname = "pi-lsp";
   version = "0.15.2";
   src = ./.;
   npmDeps = importNpmLock { npmRoot = ./.; };

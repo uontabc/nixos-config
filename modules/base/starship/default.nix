@@ -5,8 +5,8 @@
       theme = import ../../../lib/theme.nix;
       c = theme.colors;
       settings = (builtins.fromTOML (builtins.readFile ./starship.toml)) // {
-        palette = "fleet";
-        palettes.fleet = c // {
+        palette = "theme";
+        palettes.theme = c // {
           cyan = c.${theme.accent};
           purple = c.mauve;
         };
@@ -14,7 +14,7 @@
     in
     {
       hjem.users.${identity.username}.xdg.config.files."starship.toml".source =
-        (pkgs.formats.toml { }).generate "starship-fleet.toml"
+        (pkgs.formats.toml { }).generate "starship.toml"
           settings;
     };
 }

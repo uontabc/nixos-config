@@ -1,6 +1,6 @@
 { self, ... }:
 {
-  hosts.umbra = {
+  hosts."NixOS-WorkCloud" = {
     # Enable only after disk, firmware, hardware, networking and SSH are ready.
     enable = false;
     system = "x86_64-linux"; # or "aarch64-linux"

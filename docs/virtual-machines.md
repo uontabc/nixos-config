@@ -1,11 +1,11 @@
-# Obsidian 虚拟机
+# NixOS-WorkTable 虚拟机
 
 使用 **virt-manager → libvirt → QEMU/KVM**，连接地址为 `qemu:///system`。
 
 ## 应用配置
 
 ```sh
-sudo nixos-rebuild switch --flake /home/uontabc/nixos-config#obsidian --no-write-lock-file
+sudo nixos-rebuild switch --flake /home/uontabc/nixos-config#NixOS-WorkTable --no-write-lock-file
 ```
 
 第一次安装后注销并重新登录，让 `libvirtd`、`kvm` 组权限和会话环境生效。

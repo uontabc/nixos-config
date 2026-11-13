@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.obsidian =
+  flake.modules.nixos."NixOS-WorkTable" =
     {
       config,
       inputs,
@@ -8,7 +8,7 @@
       ...
     }:
     let
-      cfg = config.fleet.storage.laptop;
+      cfg = config.storage.laptop;
       ready = cfg.disk != null;
     in
     {
@@ -20,14 +20,14 @@
             description = "Roll back the ephemeral ZFS root dataset";
             requiredBy = [ "sysroot.mount" ];
             before = [ "sysroot.mount" ];
-            requires = [ "zfs-import-rpool.service" ];
-            after = [ "zfs-import-rpool.service" ];
+            requires = [ "zfs-import-ontario.service" ];
+            after = [ "zfs-import-ontario.service" ];
             unitConfig.DefaultDependencies = false;
             serviceConfig = {
               Type = "oneshot";
               # No recursive/force flags: only root is reset; unexpected newer
               # snapshots stop boot rather than being destroyed automatically.
-              ExecStart = "${config.boot.zfs.package}/bin/zfs rollback rpool/root@blank";
+              ExecStart = "${config.boot.zfs.package}/bin/zfs rollback ontario/root@blank";
             };
           };
         };

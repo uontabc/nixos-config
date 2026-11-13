@@ -1,5 +1,5 @@
 {
-  "name": "fleet-pi-extensions",
+  "name": "pi-extensions",
   "version": "1.0.0",
   "private": true,
   "dependencies": {

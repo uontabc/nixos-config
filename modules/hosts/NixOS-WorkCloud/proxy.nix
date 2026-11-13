@@ -1,8 +1,8 @@
 {
-  flake.modules.nixos.umbra =
+  flake.modules.nixos."NixOS-WorkCloud" =
     { ... }:
     {
-      fleet.reality = {
+      services.sing-box-reality = {
         enable = true;
         port = 443;
         # Example SNI/handshake target. Confirm it is reachable from your VPS.

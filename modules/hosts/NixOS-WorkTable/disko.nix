@@ -1,12 +1,12 @@
 {
-  flake.modules.nixos.obsidian =
+  flake.modules.nixos."NixOS-WorkTable" =
     { config, lib, ... }:
     let
-      cfg = config.fleet.storage.laptop;
+      cfg = config.storage.laptop;
       ready = cfg.disk != null;
     in
     {
-      options.fleet.storage.laptop.disk = lib.mkOption {
+      options.storage.laptop.disk = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
         description = "Whole disk to ERASE for the ZFS reinstall; use its verified /dev/disk/by-id path.";
@@ -17,7 +17,7 @@
           assertions = [
             {
               assertion = ready;
-              message = "Laptop disko: set fleet.storage.laptop.disk to the verified whole disk. All partitions, including Windows and the current NixOS installation, will be erased.";
+              message = "Laptop disko: set storage.laptop.disk to the verified whole disk. All partitions, including Windows and the current NixOS installation, will be erased.";
             }
             {
               assertion =
@@ -65,13 +65,13 @@
                     type = "BF01";
                     content = {
                       type = "zfs";
-                      pool = "rpool";
+                      pool = "ontario";
                     };
                   };
                 };
               };
             };
-            zpool.rpool = {
+            zpool.ontario = {
               type = "zpool";
               options = {
                 ashift = "12";
@@ -94,8 +94,8 @@
                   mountpoint = "/";
                   options.mountpoint = "legacy";
                   postCreateHook = ''
-                    if ! zfs list -H -t snapshot -o name rpool/root@blank >/dev/null 2>&1; then
-                      zfs snapshot rpool/root@blank
+                    if ! zfs list -H -t snapshot -o name ontario/root@blank >/dev/null 2>&1; then
+                      zfs snapshot ontario/root@blank
                     fi
                   '';
                 };
@@ -123,7 +123,7 @@
           boot.zfs.forceImportRoot = false;
           services.zfs.autoScrub = {
             enable = true;
-            pools = [ "rpool" ];
+            pools = [ "ontario" ];
           };
           fileSystems."/home".neededForBoot = true;
           fileSystems."/nix".neededForBoot = true;

@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.umbra =
+  flake.modules.nixos."NixOS-WorkCloud" =
     {
       config,
       lib,
@@ -7,11 +7,11 @@
       ...
     }:
     let
-      cfg = config.fleet.storage.vps;
+      cfg = config.storage.vps;
       ready = cfg.disk != null && cfg.firmware != null;
     in
     {
-      options.fleet.storage.vps = {
+      options.storage.vps = {
         disk = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = null;

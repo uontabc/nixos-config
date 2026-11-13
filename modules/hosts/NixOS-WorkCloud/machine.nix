@@ -1,12 +1,12 @@
 {
-  flake.modules.nixos.umbra =
+  flake.modules.nixos."NixOS-WorkCloud" =
     { ... }:
     {
       # Future fresh reinstall, not in-place conversion of the running VPS.
       # Import provider hardware/network settings, configure SSH keys/accounts,
       # and set the fresh installation's system.stateVersion before deployment.
       # imports = [ ./_hardware-configuration.nix ];
-      fleet.storage.vps = {
+      storage.vps = {
         disk = null; # verified whole /dev/disk/by-id/... (will be erased on reinstall)
         firmware = null; # "uefi" or "bios", verified in rescue mode
       };
