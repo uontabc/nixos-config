@@ -3,6 +3,7 @@
     { inputs, pkgs, ... }:
     let
       system = pkgs.stdenv.hostPlatform.system;
+      rkdeveloptoolGui = pkgs.callPackage ../../overlays/rkdeveloptool-gui { };
     in
     {
       # Cache for the maintainer's standalone Rayburst flake (formerly Motrix Next).
@@ -19,7 +20,9 @@
         inputs.rayburst-packages.packages.${system}.rayburst
         pkgs.kitty
         pkgs.pcmanfm
+        rkdeveloptoolGui
       ];
+      services.udev.packages = [ rkdeveloptoolGui ];
 
       # PCManFM provides file management only, not a second desktop/wallpaper layer.
       services.gvfs.enable = true;

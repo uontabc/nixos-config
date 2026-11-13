@@ -1,0 +1,2 @@
+# Grant only the active local session access, before 73-seat-late.rules.
+ACTION!="remove", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="2207", TAG+="uaccess"
