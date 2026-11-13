@@ -6,7 +6,6 @@
       {
         inputs,
         pkgs,
-        identity,
         ...
       }:
       {
@@ -28,16 +27,6 @@
           extra-substituters = [ "https://cache.lantian.pub/lantian" ];
           extra-trusted-public-keys = [ "lantian:WVGO7vsRMSEN+h7Lp7kv6SAmrkEXgUGbbXm7jMDjBuQ=" ];
         };
-
-        # VM Curator launches QEMU directly; no libvirt daemon is needed.
-        # Hardware acceleration also requires SVM / AMD-V enabled in firmware.
-        boot.kernelModules = [ "kvm-amd" ];
-        users.users.${identity.username}.extraGroups = [ "kvm" ];
-        environment.systemPackages = with pkgs; [
-          vm-curator
-          qemu
-          e2fsprogs # chattr: VM Curator disables CoW for VM storage on Btrfs.
-        ];
 
         zramSwap = {
           enable = true;
