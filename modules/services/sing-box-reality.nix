@@ -4,7 +4,6 @@
     {
       config,
       lib,
-      pkgs,
       identity,
       ...
     }:
@@ -26,6 +25,7 @@
         secretDirectory = lib.mkOption {
           type = lib.types.str;
           default = "/var/lib/sing-box-secrets";
+          description = "Directory of externally provisioned REALITY credentials; Nix never generates or rotates these files.";
         };
       };
 
@@ -76,18 +76,13 @@
         };
 
         networking.firewall.allowedTCPPorts = [ cfg.port ];
-        environment.systemPackages = [
-          (pkgs.writeShellApplication {
-            name = "reality-init";
-            runtimeInputs = [
-              config.services.sing-box.package
-              pkgs.python312
-            ];
-            text = ''
-              exec python3.12 ${../../scripts/init-reality.py} ${lib.escapeShellArg cfg.secretDirectory}
-            '';
-          })
-        ];
+        # Credentials are provisioned outside Nix and never enter the store.
+        # Creating the directory does not create, replace or rotate any secrets.
+        systemd.tmpfiles.settings."sing-box-secrets".${cfg.secretDirectory}.d = {
+          mode = "0700";
+          user = "root";
+          group = "root";
+        };
       };
     };
 }

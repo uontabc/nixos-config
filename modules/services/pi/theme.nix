@@ -16,9 +16,9 @@
         inherit (upstream) rev hash;
       };
       roles = {
-        accent = "mauve";
+        accent = theme.accent;
         border = "surface1";
-        borderAccent = "mauve";
+        borderAccent = theme.accent;
         borderMuted = "surface0";
         text = "text";
         muted = "subtext0";
@@ -31,26 +31,26 @@
         userMessageText = "text";
         customMessageBg = "mantle";
         customMessageText = "text";
-        customMessageLabel = "mauve";
+        customMessageLabel = theme.accent;
         thinkingText = "subtext0";
         toolPendingBg = "mantle";
         toolSuccessBg = "base";
         toolErrorBg = "surface0";
-        toolTitle = "mauve";
+        toolTitle = theme.accent;
         toolOutput = "text";
         toolDiffAdded = "green";
         toolDiffRemoved = "red";
         toolDiffContext = "overlay1";
-        mdHeading = "mauve";
+        mdHeading = theme.accent;
         mdLink = "blue";
         mdLinkUrl = "overlay1";
         mdCode = "green";
         mdCodeBlock = "teal";
         mdCodeBlockBorder = "surface1";
         mdQuote = "subtext0";
-        mdQuoteBorder = "mauve";
+        mdQuoteBorder = theme.accent;
         mdHr = "surface1";
-        mdListBullet = "mauve";
+        mdListBullet = theme.accent;
         mdBold = "peach";
         mdItalic = "lavender";
         syntaxComment = "overlay1";
@@ -70,10 +70,11 @@
         thinkingMax = "pink";
         bashMode = "peach";
       };
-      piTheme = pkgs.runCommand "fleet-mocha.json" { nativeBuildInputs = [ pkgs.jq ]; } ''
-        jq --argjson palette ${lib.escapeShellArg (builtins.toJSON theme.colors)} \
+      piTheme = pkgs.runCommand "${theme.name}.json" { nativeBuildInputs = [ pkgs.jq ]; } ''
+        jq --arg name ${lib.escapeShellArg theme.name} \
+           --argjson palette ${lib.escapeShellArg (builtins.toJSON theme.colors)} \
            --argjson roles ${lib.escapeShellArg (builtins.toJSON roles)} '
-          .name = "fleet-mocha" | .appearance = "dark" | .vars = $palette |
+          .name = $name | .appearance = "dark" | .vars = $palette |
           .colors |= with_entries(.value = ($roles[.key] //
             (if (.key | test("Bg$")) then "base"
              elif (.key | test("[Bb]order")) then "surface1" else "text" end))) |

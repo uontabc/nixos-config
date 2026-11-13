@@ -3,7 +3,7 @@
   flake.modules.nixos.pi-web-search =
     { pkgs, ... }:
     let
-      webSearch = pkgs.callPackage ../../../packages/pi-web-search { };
+      webSearch = pkgs.callPackage ../../../pkgs/pi-web-search { };
     in
     {
       # Use the user's current provider/auth; keep optional web-search.json writable.

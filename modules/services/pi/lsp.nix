@@ -3,7 +3,7 @@
   flake.modules.nixos.pi-lsp =
     { pkgs, ... }:
     let
-      lsp = pkgs.callPackage ../../../packages/pi-lsp { };
+      lsp = pkgs.callPackage ../../../pkgs/pi-lsp { };
       server = command: args: languageId: extensions: rootMarkers: {
         inherit command args rootMarkers;
         requireRootMarker = true;

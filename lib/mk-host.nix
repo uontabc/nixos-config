@@ -18,7 +18,7 @@ inputs.nixpkgs.lib.nixosSystem {
   };
   modules = [
     inputs.hjem.nixosModules.default
-    inputs.self.modules.nixos.common
+    inputs.self.modules.nixos.base
   ]
   ++ modules;
 }

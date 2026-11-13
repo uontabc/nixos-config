@@ -4,6 +4,13 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    # Keep the kernel's own nixpkgs pin for patch compatibility and cache hits.
+    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     import-tree.url = "github:vic/import-tree";
 
     flake-parts = {
@@ -34,11 +41,22 @@
       inputs.home-manager.follows = "";
     };
 
-    # Desktop projects retain their own pinned nixpkgs for their dependencies.
-    mango.url = "github:mangowm/mango";
+    # niri uses the cached nixpkgs release; only the X11 bridge tracks upstream.
+    xwayland-satellite = {
+      url = "github:Supreeeme/xwayland-satellite";
+      inputs.nixpkgs.follows = "nixpkgs";
+      # Only needed by upstream's development shell, not the package.
+      inputs.rust-overlay.follows = "";
+    };
+
     pi.url = "github:lukasl-dev/pi.nix";
-    vicinae.url = "github:vicinaehq/vicinae";
     noctalia.url = "github:noctalia-dev/noctalia";
+    helium-browser = {
+      url = "github:oxcl/nix-flake-helium-browser";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # Keep the maintainer's own nixpkgs pin to match its Rayburst binary cache.
+    rayburst-packages.url = "github:ccicnce113424/nix-packages";
 
     lazyvim = {
       url = "github:LazyVim/LazyVim";

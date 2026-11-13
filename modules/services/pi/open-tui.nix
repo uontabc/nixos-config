@@ -3,7 +3,7 @@
   flake.modules.nixos.pi-open-tui =
     { pkgs, ... }:
     let
-      openTui = pkgs.callPackage ../../../packages/pi-open-tui { };
+      openTui = pkgs.callPackage ../../../pkgs/pi-open-tui { };
     in
     {
       # The extension uses Pi's active theme; UI preferences remain writable in home.
