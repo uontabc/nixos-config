@@ -1,4 +1,4 @@
-// Managed by Nix/hjem. Edit this source and rebuild to persist changes.
+// Managed by Nix/nix-maid. Edit this source and rebuild to persist changes.
 // Validate with `niri validate`; changes reload automatically.
 // Kanshi controls hotplug enable/disable state, not modes or geometry.
 output "DP-1" {

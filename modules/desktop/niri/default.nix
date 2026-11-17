@@ -11,7 +11,7 @@
     let
       theme = import ../../../lib/theme.nix;
       xwaylandSatellite = inputs.xwayland-satellite.packages.${pkgs.stdenv.hostPlatform.system}.default;
-      noctalia = config.hjem.users.${identity.username}.programs.noctalia.package;
+      noctalia = config.users.users.${identity.username}.maid.programs.noctalia.package;
     in
     {
       programs.niri = {
@@ -41,7 +41,7 @@
         };
       };
 
-      hjem.users.${identity.username} = {
+      users.users.${identity.username}.maid = {
         systemd.services.kanshi = {
           description = "Switch between external-only and laptop displays";
           wantedBy = [ "niri.service" ];
@@ -54,7 +54,7 @@
             RestartSec = 2;
           };
         };
-        xdg.config.files."niri/config.kdl".source = pkgs.replaceVars ./config.kdl {
+        file.xdg_config."niri/config.kdl".source = pkgs.replaceVars ./config.kdl {
           terminal = lib.getExe pkgs.kitty;
           file_manager = lib.getExe pkgs.pcmanfm;
           noctalia = lib.getExe noctalia;

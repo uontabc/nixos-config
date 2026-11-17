@@ -1,7 +1,12 @@
 { inputs, ... }:
 {
   flake.modules.nixos.nix =
-    { lib, hostKey, ... }:
+    {
+      lib,
+      pkgs,
+      hostKey,
+      ...
+    }:
     {
       # One name for the machine hostname, flake target and rebuild command.
       networking.hostName = hostKey;
@@ -15,6 +20,8 @@
       nixpkgs.overlays = [ inputs.nur.overlays.default ];
       nixpkgs.config.allowUnfree = true;
       nix = {
+        # Replace the system Nix CLI and daemon with the stable Lix release.
+        package = pkgs.lixPackageSets.stable.lix;
         settings = {
           experimental-features = [
             "nix-command"

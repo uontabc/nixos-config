@@ -43,7 +43,7 @@
         }
       '';
 
-      hjem.users.${identity.username}.xdg.config.files."yazi/theme.toml".source =
+      users.users.${identity.username}.maid.file.xdg_config."yazi/theme.toml".source =
         (pkgs.formats.toml { }).generate "yazi-${theme.name}.toml"
           {
             # Override the built-in theme directly: no runtime flavor downloads.

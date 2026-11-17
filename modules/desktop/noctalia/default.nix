@@ -1,7 +1,6 @@
 {
   flake.modules.nixos.noctalia =
     {
-      inputs,
       identity,
       lib,
       pkgs,
@@ -37,19 +36,18 @@
         })
       ];
 
-      systemd.user.services.niri-lock-before-sleep = {
-        description = "Lock Noctalia before suspending the niri session";
-        wantedBy = [ "niri.service" ];
-        partOf = [ "niri.service" ];
-        after = [ "noctalia.service" ];
-        serviceConfig = {
-          ExecStart = "${pkgs.swayidle}/bin/swayidle -w before-sleep '${lib.getExe noctalia} msg session lock'";
-          Restart = "on-failure";
+      maid.sharedModules = [ ../../../lib/maid-noctalia.nix ];
+      users.users.${identity.username}.maid = {
+        systemd.services.niri-lock-before-sleep = {
+          description = "Lock Noctalia before suspending the niri session";
+          wantedBy = [ "niri.service" ];
+          partOf = [ "niri.service" ];
+          after = [ "noctalia.service" ];
+          serviceConfig = {
+            ExecStart = "${pkgs.swayidle}/bin/swayidle -w before-sleep '${lib.getExe noctalia} msg session lock'";
+            Restart = "on-failure";
+          };
         };
-      };
-
-      hjem.extraModules = [ inputs.noctalia.hjemModules.default ];
-      hjem.users.${identity.username} = {
         # Release 5.4.1 does not send READY=1. Upstream's Type=notify would restart
         # an otherwise healthy shell every 90 seconds.
         systemd.services.noctalia.serviceConfig = {
@@ -63,6 +61,7 @@
             enable = true;
             target = "niri.service";
           };
+          customPalettes.Bluney = import ../../../lib/themes/bluney/noctalia.nix;
           # GUI overrides, schema markers and private state remain app-owned.
           settings = import ./_settings { inherit identity; };
         };

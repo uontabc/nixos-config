@@ -24,10 +24,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hjem = {
-      url = "github:feel-co/hjem";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nix-maid.url = "git+https://codeberg.org/viperML/nix-maid";
 
     disko = {
       url = "github:nix-community/disko/latest";
@@ -37,7 +34,7 @@
     impermanence = {
       url = "github:nix-community/impermanence";
       inputs.nixpkgs.follows = "nixpkgs";
-      # Only the NixOS persistence module is used; user files remain on hjem.
+      # Only the NixOS persistence module is used; user files remain on nix-maid.
       inputs.home-manager.follows = "";
     };
 

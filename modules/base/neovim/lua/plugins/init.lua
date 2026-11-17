@@ -7,11 +7,10 @@ vim.pack.add({
 	{ src = "https://github.com/lewis6991/gitsigns.nvim" },
 	{ src = "https://github.com/stevearc/conform.nvim" },
 	{ src = "https://github.com/neovim/nvim-lspconfig" },
-	{ src = "https://github.com/folke/tokyonight.nvim" },
 }, { confirm = false })
 
-require("tokyonight").setup({ style = "night", styles = { comments = { italic = false } } })
-vim.cmd.colorscheme("tokyonight")
+vim.opt.background = "light"
+vim.cmd.colorscheme("bluney-light")
 
 require("mini.icons").setup()
 require("mini.icons").mock_nvim_web_devicons()

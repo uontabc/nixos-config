@@ -9,25 +9,47 @@
     }:
     let
       theme = import ../../lib/theme.nix;
-      gtk = pkgs.tokyonight-gtk-theme.override {
-        colorVariants = [ "dark" ];
-        sizeVariants = [ "standard" ];
-        themeVariants = [ "default" ];
-        iconVariants = [ "Dark" ];
-      };
-      configHome = config.hjem.users.${identity.username}.xdg.config.directory;
+      c = theme.colors;
+      # GTK 2 has no CSS support; supply the same palette through its rc format.
+      gtk = pkgs.writeTextDir "share/themes/${theme.gtkName}/gtk-2.0/gtkrc" ''
+        gtk-color-scheme = "fg_color:${c.text}\nbg_color:${c.base}\ntext_color:${c.text}\nbase_color:${c.base}\nselected_fg_color:${c.base}\nselected_bg_color:${c.blue}\ninsensitive_fg_color:${c.subtext0}\ninsensitive_bg_color:${c.surface0}"
+        style "bluney" {
+          fg[NORMAL] = "${c.text}"
+          fg[ACTIVE] = "${c.text}"
+          fg[PRELIGHT] = "${c.text}"
+          fg[SELECTED] = "${c.base}"
+          fg[INSENSITIVE] = "${c.subtext0}"
+          bg[NORMAL] = "${c.base}"
+          bg[ACTIVE] = "${c.surface0}"
+          bg[PRELIGHT] = "${c.surface0}"
+          bg[SELECTED] = "${c.blue}"
+          bg[INSENSITIVE] = "${c.surface0}"
+          text[NORMAL] = "${c.text}"
+          text[ACTIVE] = "${c.text}"
+          text[PRELIGHT] = "${c.text}"
+          text[SELECTED] = "${c.base}"
+          text[INSENSITIVE] = "${c.subtext0}"
+          base[NORMAL] = "${c.base}"
+          base[ACTIVE] = "${c.surface0}"
+          base[PRELIGHT] = "${c.surface0}"
+          base[SELECTED] = "${c.blue}"
+          base[INSENSITIVE] = "${c.surface0}"
+        }
+        class "*" style "bluney"
+      '';
+      configHome = "${config.users.users.${identity.username}.home}/.config";
       cursorSettings = ''
         [Icon Theme]
         Inherits=${theme.cursorName}
       '';
       gtkSettings = ''
         [Settings]
-        gtk-theme-name=adw-gtk3-dark
+        gtk-theme-name=adw-gtk3
         gtk-icon-theme-name=${theme.icons}
         gtk-font-name=${theme.fonts.sans} ${toString theme.fonts.size}
         gtk-cursor-theme-name=${theme.cursorName}
         gtk-cursor-theme-size=${toString theme.cursorSize}
-        gtk-application-prefer-dark-theme=true
+        gtk-application-prefer-dark-theme=false
       '';
       qtSettings = qtVersion: ''
         [Appearance]
@@ -48,7 +70,7 @@
             # Keep fonts/icons/cursor fixed; Noctalia may select the GTK theme.
             lockAll = true;
             settings."org/gnome/desktop/interface" = {
-              color-scheme = "prefer-dark";
+              color-scheme = "prefer-light";
               icon-theme = theme.icons;
               cursor-theme = theme.cursorName;
               cursor-size = lib.gvariant.mkInt32 theme.cursorSize;
@@ -75,19 +97,19 @@
         XCURSOR_THEME = theme.cursorName;
         XCURSOR_SIZE = toString theme.cursorSize;
       };
-      hjem.users.${identity.username} = {
+      users.users.${identity.username}.maid = {
         # Legacy Xcursor users and clients that request the "default" theme.
-        files.".icons/default/index.theme".text = cursorSettings;
+        file.home.".icons/default/index.theme".text = cursorSettings;
         # GTK 2 does not read gtk-3.0/settings.ini (some game launchers still use it).
-        files.".gtkrc-2.0".text = ''
+        file.home.".gtkrc-2.0".text = ''
           gtk-theme-name="${theme.gtkName}"
           gtk-icon-theme-name="${theme.icons}"
           gtk-font-name="${theme.fonts.sans} ${toString theme.fonts.size}"
           gtk-cursor-theme-name="${theme.cursorName}"
           gtk-cursor-theme-size=${toString theme.cursorSize}
         '';
-        xdg.data.files."icons/default/index.theme".text = cursorSettings;
-        xdg.config.files = {
+        file.xdg_data."icons/default/index.theme".text = cursorSettings;
+        file.xdg_config = {
           "gtk-3.0/settings.ini".text = gtkSettings;
           "gtk-4.0/settings.ini".text = gtkSettings;
           # Import generated colors without letting hooks replace Nix-managed files.

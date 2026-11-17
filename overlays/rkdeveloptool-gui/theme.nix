@@ -19,7 +19,7 @@ let
   right = arrow "right" "270";
 in
 ''
-  /* Application-local Tokyo Night; do not load host Qt plugins into bundled Qt. */
+  /* Application-local ${theme.name}; do not load host Qt plugins into bundled Qt. */
   QWidget {
     color: ${c.text};
     background-color: ${c.base};

@@ -72,14 +72,15 @@
       };
       piTheme = pkgs.runCommand "${theme.name}.json" { nativeBuildInputs = [ pkgs.jq ]; } ''
         jq --arg name ${lib.escapeShellArg theme.name} \
+           --arg appearance ${lib.escapeShellArg theme.style} \
            --argjson palette ${lib.escapeShellArg (builtins.toJSON theme.colors)} \
            --argjson roles ${lib.escapeShellArg (builtins.toJSON roles)} '
-          .name = $name | .appearance = "dark" | .vars = $palette |
+          .name = $name | .appearance = $appearance | .vars = $palette |
           .colors |= with_entries(.value = ($roles[.key] //
             (if (.key | test("Bg$")) then "base"
              elif (.key | test("[Bb]order")) then "surface1" else "text" end))) |
           .export = {pageBg: "base", cardBg: "mantle", infoBg: "surface0"}
-        ' ${source}/packages/coding-agent/src/modes/interactive/theme/dark.json > "$out"
+        ' ${source}/packages/coding-agent/src/modes/interactive/theme/${theme.style}.json > "$out"
       '';
     in
     {

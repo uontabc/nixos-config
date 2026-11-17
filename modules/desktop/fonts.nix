@@ -13,7 +13,7 @@
       fonts.packages = with pkgs; [
         recursive
         nerd-fonts.symbols-only
-        lxgw-wenkai
+        source-han-sans
         noto-fonts
         noto-fonts-cjk-sans
         noto-fonts-cjk-serif
@@ -43,8 +43,8 @@
           ];
           emoji = [ "Noto Color Emoji" ];
         };
-        # Strong ordering prevents zh-cn coverage scoring from promoting Noto CJK
-        # above WenKai, while preserving the Latin and monospace families first.
+        # Strong ordering keeps zh-cn coverage scoring from promoting Noto CJK
+        # above Source Han Sans, while preserving the Latin families first.
         localConf = ''
           <fontconfig>
             ${lib.concatStringsSep "\n" (

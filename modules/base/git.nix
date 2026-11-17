@@ -1,6 +1,6 @@
 {
   flake.modules.nixos.git = { identity, ... }: {
-    hjem.users.${identity.username}.xdg.config.files."git/config".text = ''
+    users.users.${identity.username}.maid.file.xdg_config."git/config".text = ''
       [user]
         name = ${identity.fullName}
         email = ${identity.email}

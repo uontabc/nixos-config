@@ -40,11 +40,11 @@
         };
 
         # The entire /home and /nix are separate persistent datasets, not binds.
+        # nix-maid keeps its state in the persistent user's ~/.local/state.
         environment.persistence."/persist" = {
           hideMounts = true;
           directories = [
             "/var/lib/nixos"
-            "/var/lib/hjem"
             "/var/lib/systemd"
             "/var/lib/fwupd"
             "/var/lib/upower"

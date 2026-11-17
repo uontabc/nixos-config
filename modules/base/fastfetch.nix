@@ -6,7 +6,7 @@
       c = theme.colors;
     in
     {
-      hjem.users.${identity.username}.xdg.config.files."fastfetch/config.jsonc".source =
+      users.users.${identity.username}.maid.file.xdg_config."fastfetch/config.jsonc".source =
         (pkgs.formats.json { }).generate "fastfetch-config.jsonc"
           {
             "$schema" = "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json";

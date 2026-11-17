@@ -5,12 +5,12 @@
       home = "/home/${identity.username}";
       description = identity.fullName;
       shell = pkgs.zsh;
+      maid = { };
       extraGroups = [
         "wheel"
         "video"
         "render"
       ];
     };
-    hjem.users.${identity.username}.enable = true;
   };
 }

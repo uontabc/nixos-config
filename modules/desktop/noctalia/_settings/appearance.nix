@@ -1,11 +1,12 @@
 { identity }:
 {
   theme = {
-    mode = "dark";
+    mode = "light";
     shell_mode = "follow";
-    source = "builtin";
-    builtin = "Tokyo-Night";
-    community_palette = "Oxocarbon";
+    source = "custom";
+    custom_palette = "Bluney";
+    terminal_colors = "palette";
+    sync_color_scheme = true;
     wallpaper_scheme = "m3-content";
     templates = {
       # Match the installed desktop; Nix owns integration, Noctalia owns colors.

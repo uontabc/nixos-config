@@ -8,9 +8,11 @@
       promptInit = "";
     };
     # Manage the individual file so shell history remains writable.
-    hjem.users.${identity.username}.files.".zshrc".source = pkgs.replaceVars ./interactive.zsh {
-      history_guard = "${pkgs.python312}/bin/python3 ${./history-guard.py}";
-      history_zsh = "${pkgs.zsh}/bin/zsh";
-    };
+    users.users.${identity.username}.maid.file.home.".zshrc".source =
+      pkgs.replaceVars ./interactive.zsh
+        {
+          history_guard = "${pkgs.python312}/bin/python3 ${./history-guard.py}";
+          history_zsh = "${pkgs.zsh}/bin/zsh";
+        };
   };
 }

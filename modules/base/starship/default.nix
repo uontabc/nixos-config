@@ -13,7 +13,7 @@
       };
     in
     {
-      hjem.users.${identity.username}.xdg.config.files."starship.toml".source =
+      users.users.${identity.username}.maid.file.xdg_config."starship.toml".source =
         (pkgs.formats.toml { }).generate "starship.toml"
           settings;
     };

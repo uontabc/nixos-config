@@ -1,50 +1,56 @@
+let
+  # Upstream palette.json is the source of truth; README colors can lag behind it.
+  palette = (builtins.fromJSON (builtins.readFile ./themes/bluney/palette.json)).variants.light;
+  e = palette.editor;
+  a = palette.accents;
+in
 {
-  name = "tokyo-night";
-  style = "night";
+  name = "bluney-light";
+  style = "light";
   accent = "blue";
+  ansi = palette.ansi;
   fonts = {
     sans = "Rec Mono Linear";
     mono = "Rec Mono Linear";
     symbols = "Symbols Nerd Font Mono";
-    cjk = "LXGW WenKai";
-    cjkMono = "LXGW WenKai Mono";
+    # Use Simplified Chinese Source Han Sans for UI and terminal CJK glyphs.
+    cjk = "Source Han Sans SC";
+    cjkMono = "Source Han Sans SC";
     size = 11;
   };
-  gtkName = "Tokyonight-Dark";
-  kvantumName = "Kvantum-Tokyo-Night";
-  fcitxName = "Tokyonight-Storm";
+  gtkName = "Bluney-Light";
+  fcitxName = "deepinExp-light";
   cursorName = "Bibata-Modern-Ice";
   cursorSize = 24;
-  icons = "Tela-dark";
-  # Tokyo Night (night): https://github.com/folke/tokyonight.nvim
+  icons = "Tela";
   # Keep shared role names stable for the terminal, prompt, Yazi and Pi.
   colors = {
-    rosewater = "#c0caf5";
-    flamingo = "#f7768e";
-    pink = "#bb9af7";
-    mauve = "#bb9af7";
-    red = "#f7768e";
-    maroon = "#db4b4b";
-    peach = "#ff9e64";
-    yellow = "#e0af68";
-    green = "#9ece6a";
-    teal = "#1abc9c";
-    sky = "#7dcfff";
-    sapphire = "#2ac3de";
-    blue = "#7aa2f7";
-    lavender = "#b4f9f8";
-    text = "#c0caf5";
-    subtext1 = "#a9b1d6";
-    subtext0 = "#9aa5ce";
-    overlay2 = "#737aa2";
-    overlay1 = "#565f89";
-    overlay0 = "#414868";
-    surface2 = "#414868";
-    surface1 = "#292e42";
-    surface0 = "#1f2335";
-    selection = "#283457";
-    base = "#1a1b26";
-    mantle = "#16161e";
-    crust = "#15161e";
+    rosewater = e.fg;
+    flamingo = a.error;
+    pink = a.rose;
+    mauve = a.rose;
+    red = a.error;
+    maroon = a.error;
+    peach = a.yellow;
+    yellow = a.yellow;
+    green = a.primary;
+    teal = a.cyan;
+    sky = a.cyan;
+    sapphire = a.secondary;
+    blue = a.primary;
+    lavender = a.rose;
+    text = e.fg;
+    subtext1 = e.comment;
+    subtext0 = e.comment;
+    overlay2 = e.comment;
+    overlay1 = e.comment;
+    overlay0 = e.border;
+    surface2 = e.border;
+    surface1 = e.surface;
+    surface0 = e.surface;
+    selection = palette.terminal.selection_background;
+    base = e.bg;
+    mantle = e.surface;
+    crust = e.surface;
   };
 }

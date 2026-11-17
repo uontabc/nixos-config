@@ -1,0 +1,96 @@
+{
+  "name": "Bluney",
+  "version": "1.0.0",
+  "variants": {
+    "dark": {
+      "terminal": {
+        "background": "#0E1B2E",
+        "foreground": "#D5E5F2",
+        "cursor": "#D5E5F2",
+        "cursor_text": "#0E1B2E",
+        "selection_background": "#152A45",
+        "selection_foreground": "#D5E5F2",
+        "url_color": "#7DBBFF"
+      },
+      "ansi": [
+        "#16283E",
+        "#E18B8B",
+        "#7DBBFF",
+        "#E0CD97",
+        "#4F8FE0",
+        "#B9A8E0",
+        "#7FD7F2",
+        "#D5E5F2",
+        "#5F7E9E",
+        "#F0A8A8",
+        "#A8D4FF",
+        "#EBDFA8",
+        "#7FA9E8",
+        "#CDBEF0",
+        "#A8E8F8",
+        "#FFFFFF"
+      ],
+      "editor": {
+        "bg": "#0E1B2E",
+        "surface": "#152A45",
+        "fg": "#D5E5F2",
+        "comment": "#7E9BB8",
+        "border": "#7E9BB8",
+        "bg_hi": "#152A45"
+      },
+      "accents": {
+        "primary": "#7DBBFF",
+        "secondary": "#4F8FE0",
+        "yellow": "#E0CD97",
+        "rose": "#B9A8E0",
+        "cyan": "#7FD7F2",
+        "error": "#E18B8B"
+      }
+    },
+    "light": {
+      "terminal": {
+        "background": "#F0F5FB",
+        "foreground": "#1E2F45",
+        "cursor": "#1E2F45",
+        "cursor_text": "#F0F5FB",
+        "selection_background": "#E3EAF6",
+        "selection_foreground": "#1E2F45",
+        "url_color": "#2F6FB8"
+      },
+      "ansi": [
+        "#E3EAF6",
+        "#AE4A42",
+        "#2F6FB8",
+        "#7A5F1A",
+        "#2F5E9E",
+        "#6B5AA8",
+        "#1B6E8A",
+        "#1E2F45",
+        "#5A6F8A",
+        "#D0705F",
+        "#4F8FD4",
+        "#A08428",
+        "#5B7FC4",
+        "#8B7FD4",
+        "#3E9EB8",
+        "#FFFFFF"
+      ],
+      "editor": {
+        "bg": "#F0F5FB",
+        "surface": "#E3EAF6",
+        "fg": "#1E2F45",
+        "comment": "#5A6F8A",
+        "border": "#B7CBE3",
+        "bg_hi": "#E3EAF6"
+      },
+      "accents": {
+        "primary": "#2F6FB8",
+        "secondary": "#2F5E9E",
+        "yellow": "#7A5F1A",
+        "rose": "#6B5AA8",
+        "cyan": "#1B6E8A",
+        "error": "#AE4A42"
+      }
+    }
+  }
+}

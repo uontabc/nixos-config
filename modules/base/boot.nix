@@ -2,40 +2,6 @@
 {
   flake.modules.nixos.laptop =
     { identity, pkgs, ... }:
-    let
-      theme = import ../../lib/theme.nix;
-      c = theme.colors;
-      accent = c.${theme.accent};
-      grubTheme = pkgs.writeTextDir "theme.txt" ''
-        # Minimal Tokyo Night menu; no wallpaper or external image assets.
-        desktop-color: "${c.base}"
-        title-text: "NixOS"
-        title-color: "${accent}"
-        message-color: "${c.text}"
-        message-bg-color: "${c.base}"
-        + boot_menu {
-          left = 15%
-          top = 30%
-          width = 70%
-          height = 45%
-          item_color = "${c.text}"
-          selected_item_color = "${accent}"
-          item_height = 36
-          item_spacing = 8
-          icon_width = 0
-          icon_height = 0
-          item_icon_space = 0
-        }
-        + label {
-          top = 85%
-          left = 15%
-          width = 70%
-          align = "center"
-          color = "${c.subtext0}"
-          text = "Select a system and press Enter"
-        }
-      '';
-    in
     {
       boot.loader = {
         systemd-boot.enable = false;
@@ -47,13 +13,15 @@
           copyKernels = true;
           configurationLimit = 5;
           useOSProber = false;
-          theme = grubTheme;
+          theme = pkgs.minimal-grub-theme;
+          default = 0;
+          timeoutStyle = "menu";
         };
         efi = {
           canTouchEfiVariables = true;
           efiSysMountPoint = "/efi";
         };
-        timeout = 5;
+        timeout = 10;
       };
 
       # NixOS is the only OS on this disk; keep the hardware clock in UTC.
