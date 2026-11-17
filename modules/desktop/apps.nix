@@ -16,7 +16,7 @@
 
       programs.obs-studio.enable = true;
       environment.systemPackages = [
-        inputs.helium-browser.packages.${system}.default
+        inputs.zen-browser.packages.${system}.beta
         inputs.rayburst-packages.packages.${system}.rayburst
         pkgs.kitty
         pkgs.pcmanfm
@@ -29,10 +29,10 @@
       services.udisks2.enable = true;
       xdg.mime.defaultApplications = {
         "inode/directory" = "pcmanfm.desktop";
-        "x-scheme-handler/http" = "helium.desktop";
-        "x-scheme-handler/https" = "helium.desktop";
-        "text/html" = "helium.desktop";
-        "application/xhtml+xml" = "helium.desktop";
+        "x-scheme-handler/http" = "zen-beta.desktop";
+        "x-scheme-handler/https" = "zen-beta.desktop";
+        "text/html" = "zen-beta.desktop";
+        "application/xhtml+xml" = "zen-beta.desktop";
       };
     };
 }

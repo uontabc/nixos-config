@@ -51,21 +51,13 @@
 
     pi.url = "github:lukasl-dev/pi.nix";
     noctalia.url = "github:noctalia-dev/noctalia";
-    helium-browser = {
-      url = "github:oxcl/nix-flake-helium-browser";
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # Keep the maintainer's own nixpkgs pin to match its Rayburst binary cache.
     rayburst-packages.url = "github:ccicnce113424/nix-packages";
 
-    lazyvim = {
-      url = "github:LazyVim/LazyVim";
-      flake = false;
-    };
-    lazy-nvim = {
-      url = "github:folke/lazy.nvim/stable";
-      flake = false;
-    };
   };
 
   outputs =

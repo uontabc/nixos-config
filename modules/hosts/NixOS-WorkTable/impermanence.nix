@@ -22,9 +22,16 @@
             before = [ "sysroot.mount" ];
             requires = [ "zfs-import-ontario.service" ];
             after = [ "zfs-import-ontario.service" ];
-            unitConfig.DefaultDependencies = false;
+            unitConfig = {
+              DefaultDependencies = false;
+              # Never reset an already mounted root, even if the unit is restarted.
+              ConditionPathIsMountPoint = "!/sysroot";
+            };
             serviceConfig = {
               Type = "oneshot";
+              # initrd-parse-etc reloads units and requests the mount graph again.
+              # Stay active so a second start cannot roll back live mountpoints.
+              RemainAfterExit = true;
               # No recursive/force flags: only root is reset; unexpected newer
               # snapshots stop boot rather than being destroyed automatically.
               ExecStart = "${config.boot.zfs.package}/bin/zfs rollback ontario/root@blank";

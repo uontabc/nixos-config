@@ -1,12 +1,13 @@
 {
   flake.modules.nixos.gaming =
-    { config, ... }:
+    { config, pkgs, ... }:
     {
       # Includes the Steam runtime, controller rules and 32-bit audio support.
       # Remote Play / LAN transfer firewall ports remain closed by default.
       programs.steam = {
         enable = true;
         extraPackages = [ config.programs.gamescope.package ];
+        extraCompatPackages = [ pkgs.proton-ge-bin ];
       };
       programs.gamescope = {
         enable = true;

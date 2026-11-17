@@ -59,7 +59,7 @@ layout {
         proportion 0.7
         proportion 0.85
     }
-    default-column-width { proportion 0.85; }
+    default-column-width { proportion 1.0; }
     focus-ring { off; }
     border { off; }
     shadow { off; }
@@ -90,7 +90,8 @@ animations {
 }
 
 window-rule {
-    // Apply the same opening width to tiled and floating windows.
+    // Maximize tiled columns on opening; keep floating windows at a usable width.
+    open-maximized true
     default-column-width { proportion 0.8; }
     geometry-corner-radius 10
     clip-to-geometry true
