@@ -29,9 +29,9 @@
             ${lib.optionalString useNoctaliaTheme "include themes/noctalia.conf"}
             font_family ${theme.fonts.mono}
             font_size ${toString (theme.fonts.size + 1)}
-            # Keep Latin code unchanged; use Source Han Sans for Chinese.
+            # Keep the Latin font; use Noto's monospace CJK family for Chinese.
             symbol_map U+2E80-U+303F,U+31C0-U+31EF,U+3400-U+4DBF,U+4E00-U+9FFF,U+F900-U+FAFF,U+FE10-U+FE1F,U+FE30-U+FE4F,U+FF00-U+FFEF,U+20000-U+2FA1F,U+30000-U+323AF ${theme.fonts.cjkMono}
-            # Recursive is unpatched; render Nerd Font private-use icons separately.
+            # Render Nerd Font private-use icons separately from the text font.
             symbol_map U+E000-U+F8FF,U+F0000-U+FFFFD ${theme.fonts.symbols}
             # Smooth text-cursor trails, including single-cell movements.
             cursor_trail 3

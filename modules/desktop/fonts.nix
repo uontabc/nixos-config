@@ -11,9 +11,9 @@
     in
     {
       fonts.packages = with pkgs; [
-        recursive
+        nur.repos.shadowrz.hanekokoro-sans
+        nur.repos.shadowrz.hanekokoro-mono
         nerd-fonts.symbols-only
-        source-han-sans
         noto-fonts
         noto-fonts-cjk-sans
         noto-fonts-cjk-serif
@@ -27,24 +27,20 @@
           monospace = [
             theme.fonts.mono
             theme.fonts.cjkMono
-            "Noto Sans CJK SC"
             theme.fonts.symbols
           ];
           sansSerif = [
             theme.fonts.sans
             theme.fonts.cjk
-            "Noto Sans CJK SC"
             theme.fonts.symbols
           ];
           serif = [
             "Noto Serif"
-            theme.fonts.cjk
             "Noto Serif CJK SC"
           ];
           emoji = [ "Noto Color Emoji" ];
         };
-        # Strong ordering keeps zh-cn coverage scoring from promoting Noto CJK
-        # above Source Han Sans, while preserving the Latin families first.
+        # Keep Latin families first even when matching fonts in CJK locales.
         localConf = ''
           <fontconfig>
             ${lib.concatStringsSep "\n" (

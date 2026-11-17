@@ -38,7 +38,7 @@
       powerManagement.enable = true;
       services.power-profiles-daemon.enable = true;
       services.upower.enable = true;
-      services.fwupd.enable = true;
+      services.fwupd.enable = false;
       services.libinput.enable = true;
 
       security.rtkit.enable = true;

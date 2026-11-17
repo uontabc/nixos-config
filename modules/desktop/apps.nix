@@ -20,6 +20,7 @@
         inputs.rayburst-packages.packages.${system}.rayburst
         pkgs.kitty
         pkgs.pcmanfm
+        pkgs.telegram-desktop
         rkdeveloptoolGui
       ];
       services.udev.packages = [ rkdeveloptoolGui ];

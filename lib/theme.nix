@@ -10,12 +10,12 @@ in
   accent = "blue";
   ansi = palette.ansi;
   fonts = {
-    sans = "Rec Mono Linear";
-    mono = "Rec Mono Linear";
+    sans = "Hanekokoro Sans";
+    mono = "Hanekokoro Mono";
     symbols = "Symbols Nerd Font Mono";
-    # Use Simplified Chinese Source Han Sans for UI and terminal CJK glyphs.
-    cjk = "Source Han Sans SC";
-    cjkMono = "Source Han Sans SC";
+    # Use the standard Noto CJK families for Chinese UI and terminal glyphs.
+    cjk = "Noto Sans CJK SC";
+    cjkMono = "Noto Sans Mono CJK SC";
     size = 11;
   };
   gtkName = "Bluney-Light";
