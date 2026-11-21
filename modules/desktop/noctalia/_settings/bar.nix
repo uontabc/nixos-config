@@ -5,60 +5,93 @@
       position = "top";
       # Fullscreen windows cover the top layer; overlay would remain above them.
       layer = "top";
-      thickness = 35;
-      # Release 5.4.1 uses logical pixels: 20% of 2560 / 1.5, rounded.
-      margin_ends = 341;
+      thickness = 33;
+      margin_ends = 10;
       margin_edge = 8;
       padding = 15;
       hover_highlight = false;
       widget_spacing = 5;
-      radius = 10;
+      radius = 20;
       background_opacity = 1.0;
-      shadow = true;
+      shadow = false;
+      compositor_blur = false;
+      capsule_radius = 7;
+      capsule_thickness = 0.79999998584389687;
       show_tooltip = false;
       reserve_space = true;
-      start = [ "workspaces" ];
-      center = [ "clock" ];
-      end = [
-        "tray"
-        "network"
-        "bluetooth"
-        "volume"
-        "battery"
-        "bar"
-        "cat"
+      start = [ "group:g1" ];
+      center = [ "weather" ];
+      end = [ "group:g3" ];
+      capsule_group = [
+        {
+          id = "g1";
+          members = [
+            "workspaces"
+            "cpu"
+            "ram"
+            "temp"
+          ];
+          enabled = true;
+          accordion = false;
+          accordion_direction = "end";
+          border = "on_primary_container";
+          border_width = 1.0;
+          fill = "surface_container";
+          opacity = 1.0;
+          padding = 10.0;
+        }
+        {
+          id = "g3";
+          members = [
+            "tray"
+            "brightness"
+            "network"
+            "bar"
+            "battery"
+          ];
+          enabled = true;
+          accordion = false;
+          accordion_direction = "end";
+          border = "on_primary_container";
+          border_width = 1.0;
+          fill = "surface_container";
+          opacity = 1.0;
+          padding = 6.0;
+        }
       ];
     };
   };
   widget = {
-    cat = {
-      type = "noctalia/bongocat:cat";
-      # Listen to the built-in keyboard and USB keyboards via stable paths.
-      # Use by-id for USB devices to avoid duplicate usb/usbv2 by-path aliases.
-      input_devices = [
-        "/dev/input/by-path/platform-i8042-serio-0-event-kbd"
-        "/dev/input/by-id/*-event-kbd"
-      ];
-      executable_path = "evtest";
-      audio_spectrum = true;
-      tappy_mode = true;
-      rave_mode = false;
-      use_mpris_filter = true;
-    };
     bar = {
       type = "raycursive/niri-displays:bar";
-      anchor = true;
+      anchor = false;
       show_resolution = false;
     };
     workspaces = {
       style = "regular";
       change_color_on_hover = false;
-      hide_when_empty = false;
+      hide_when_empty = true;
       capsule_radius = "auto";
-      show_labels = true;
+      show_labels = false;
       label_source = "id";
+      active_pill_size = 2.1500000000000004;
+      focused_output_only = true;
     };
-    clock.format = "{:%H:%M:%S}";
+    clock = {
+      format = "{:%H:%M:%S}";
+      capsule = true;
+      capsule_border = "on_primary_container";
+      capsule_radius = 5;
+    };
+    weather = {
+      capsule = true;
+      capsule_border = "on_primary_container";
+      capsule_radius = "auto";
+    };
+    audio_visualizer = {
+      show_when_idle = true;
+      width = 220;
+    };
     notifications.hide_when_no_unread = true;
     network.show_label = false;
     volume.show_label = false;

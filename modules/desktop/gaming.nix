@@ -6,8 +6,17 @@
       # Remote Play / LAN transfer firewall ports remain closed by default.
       programs.steam = {
         enable = true;
-        extraPackages = [ config.programs.gamescope.package ];
-        extraCompatPackages = [ pkgs.proton-ge-bin ];
+        package = pkgs.steam.override {
+          extraProfile = ''
+            # pressure-vessel hides /run/current-system, but keeps /nix/store visible.
+            export XCURSOR_PATH="${pkgs.bibata-cursors}/share/icons''${XCURSOR_PATH:+:$XCURSOR_PATH}"
+          '';
+        };
+        extraPackages = [
+          config.programs.gamescope.package
+          pkgs.bibata-cursors
+        ];
+        extraCompatPackages = [ pkgs.dwproton-bin ];
       };
       programs.gamescope = {
         enable = true;

@@ -4,6 +4,12 @@
     font_family = theme.fonts.mono;
     lang = "zh-Hans";
     polkit_agent = true;
+    launch_apps_as_systemd_services = true;
+    settings_expand_all_groups = true;
+    screen_corners = {
+      enabled = true;
+      size = 24;
+    };
     panel_anchor_bar = "main";
     panel = {
       control_center_placement = "floating";
@@ -22,10 +28,7 @@
   };
   plugins = {
     auto_update = "all";
-    enabled = [
-      "raycursive/niri-displays"
-      "noctalia/bongocat"
-    ];
+    enabled = [ "raycursive/niri-displays" ];
   };
   plugin_settings."raycursive/niri-displays" = {
     # The panel may make temporary changes; Nix owns persistent output defaults.
@@ -34,6 +37,9 @@
     panel_placement = "floating";
     panel_position = "center";
   };
+  audio.colorize_icons = true;
+  control_center.width = 710;
+  location.auto_locate = true;
   idle.behavior = {
     lock = {
       enabled = true;

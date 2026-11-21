@@ -21,7 +21,7 @@
           canTouchEfiVariables = true;
           efiSysMountPoint = "/efi";
         };
-        timeout = 10;
+        timeout = 5;
       };
 
       # NixOS is the only OS on this disk; keep the hardware clock in UTC.

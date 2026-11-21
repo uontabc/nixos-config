@@ -23,19 +23,6 @@
     {
       security.pam.services.noctalia = { };
 
-      environment.systemPackages = [ pkgs.evtest ];
-      services.udev.packages = [
-        (pkgs.writeTextFile {
-          name = "noctalia-bongocat-udev-rules";
-          destination = "/lib/udev/rules.d/70-noctalia-bongocat.rules";
-          # Run before 73-seat-late.rules: grant only the active local session
-          # access to keyboards (built-in and USB), not the entire input group.
-          text = ''
-            ACTION!="remove", SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_KEYBOARD}=="1", TAG+="uaccess"
-          '';
-        })
-      ];
-
       maid.sharedModules = [ ../../../lib/maid-noctalia.nix ];
       users.users.${identity.username}.maid = {
         systemd.services.niri-lock-before-sleep = {

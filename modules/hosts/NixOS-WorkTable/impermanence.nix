@@ -66,6 +66,25 @@
           files = [ "/etc/machine-id" ];
         };
 
+        # Keep local recovery points only for durable data. Never snapshot root
+        # here: a newer snapshot would block the non-recursive boot rollback.
+        services.sanoid = {
+          enable = true;
+          datasets = lib.genAttrs [ "ontario/home" "ontario/persist" ] (_: {
+            useTemplate = [ "worktable" ];
+            recursive = false;
+          });
+          templates.worktable = {
+            autosnap = true;
+            autoprune = true;
+            frequently = 0;
+            hourly = 0;
+            daily = 7;
+            monthly = 0;
+            yearly = 0;
+          };
+        };
+
         # Seed this hash on the target's /persist before nixos-install. No passwords
         # or hashes are embedded in the repository or Nix store.
         users.mutableUsers = false;

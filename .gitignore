@@ -1,6 +1,21 @@
+# Nix build outputs and local environments
 result
 result-*
 .direnv/
 verification/
+
+# Python caches
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editor / patch backups
+*~
+*.bak
+*.orig
+*.rej
+*.swp
+*.swo
+.DS_Store

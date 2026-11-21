@@ -1,0 +1,36 @@
+--- a/main.c
++++ b/main.c
+@@ -453,6 +453,19 @@
+ 			keypress->utf8[0] = '\0';
+ 		}
+ 
++		/* Persistent display must not accumulate an unbounded key history. */
++		if (state->timeout == 0) {
++			size_t count = 0;
++			for (struct wsk_keypress *key = state->keys; key; key = key->next) {
++				++count;
++			}
++			if (count >= 12) {
++				struct wsk_keypress *old = state->keys;
++				state->keys = old->next;
++				free(old);
++			}
++		}
++
+ 		struct wsk_keypress **link = &state->keys;
+ 		while (*link) {
+ 			link = &(*link)->next;
+@@ -652,4 +665,4 @@
+ 		int timeout = -1;
+-		if (state.keys) {
++		if (state.keys && state.timeout > 0) {
+ 			timeout = 100;
+ 		}
+@@ -665,3 +678,5 @@
+-		if (now.tv_sec >= state.last_key.tv_sec + state.timeout &&
+-				now.tv_nsec >= state.last_key.tv_nsec) {
++		if (state.keys && state.timeout > 0 &&
++				(now.tv_sec > state.last_key.tv_sec + state.timeout ||
++				(now.tv_sec == state.last_key.tv_sec + state.timeout &&
++				 now.tv_nsec >= state.last_key.tv_nsec))) {
+ 			struct wsk_keypress *key = state.keys;

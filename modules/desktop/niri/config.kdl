@@ -9,7 +9,7 @@ output "DP-1" {
 }
 output "eDP-1" {
     mode "2560x1600@240.000"
-    scale 1.5
+    scale 1.25
     transform "normal"
     position x=2560 y=0
 }
@@ -33,6 +33,11 @@ input {
     focus-follows-mouse max-scroll-amount="0%"
 }
 
+// Keep overview on explicit keybinds instead of the top-left pointer hot corner.
+gestures {
+    hot-corners { off; }
+}
+
 cursor {
     xcursor-theme "@cursor_theme@"
     xcursor-size @cursor_size@
@@ -53,16 +58,28 @@ layout {
     gaps 10
     background-color "@base@"
     center-focused-column "on-overflow"
-    always-center-single-column
+    // Single columns start on the left; two half-width columns fit side by side.
     preset-column-widths {
-        proportion 0.5
-        proportion 0.7
-        proportion 0.85
+        proportion 0.33333
+        proportion 0.66667
+        proportion 1.0
     }
-    default-column-width { proportion 1.0; }
-    focus-ring { off; }
+    default-column-width { proportion 0.5; }
+    preset-window-heights {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+    // Noctalia overrides the colors below, but not the focus-ring geometry.
+    focus-ring {
+        width 2
+        active-color "@accent@"
+        inactive-color "@inactive@"
+        urgent-color "@urgent@"
+    }
     border { off; }
     shadow { off; }
+    tab-indicator { hide-when-single-tab; }
 }
 
 // Noctalia owns colors only; the optional include is safe before its first generation.
@@ -80,38 +97,169 @@ screenshot-path "~/Pictures/Screenshots/Screenshot-%Y-%m-%d_%H-%M-%S.png"
 hotkey-overlay { skip-at-startup; }
 
 animations {
-    window-open { duration-ms 180; curve "ease-out-expo"; }
-    window-close { duration-ms 140; curve "ease-out-quad"; }
-    window-movement { duration-ms 180; curve "ease-out-cubic"; }
-    window-resize { duration-ms 180; curve "ease-out-cubic"; }
-    horizontal-view-movement { spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001; }
-    workspace-switch { spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001; }
-    overview-open-close { duration-ms 200; curve "ease-out-cubic"; }
+    // A springy pop: overshoot geometry, but never oscillate the opacity.
+    window-open {
+        spring damping-ratio=0.55 stiffness=500 epsilon=0.001
+        custom-shader r"
+            vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+                float progress = niri_progress;
+                float scale = max(0.1, mix(0.82, 1.0, progress));
+                float remaining = 1.0 - progress;
+                vec2 squash = vec2(1.0 + 0.035 * remaining, 1.0 - 0.035 * remaining);
+                vec2 center = vec2(0.5, 0.5);
+                vec2 offset = vec2(0.0, 28.0 / size_geo.y) * remaining;
+                coords_geo.xy = (coords_geo.xy - center - offset) / (scale * squash) + center;
+                vec2 coords_tex = (niri_geo_to_tex * coords_geo).xy;
+
+                // Do not stretch edge pixels into the transparent surroundings.
+                if (any(lessThan(coords_tex, vec2(0.0))) ||
+                    any(greaterThan(coords_tex, vec2(1.0)))) {
+                    return vec4(0.0);
+                }
+                // Textures use premultiplied alpha: fade all four channels.
+                return texture2D(niri_tex, coords_tex) * niri_clamped_progress;
+            }
+        "
+    }
+    // Shrink visibly before fading: the old effect faded before its motion was clear.
+    window-close {
+        duration-ms 300
+        curve "ease-out-cubic"
+        custom-shader r"
+            vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+                float progress = niri_clamped_progress;
+                float scale = mix(1.0, 0.65, progress);
+                float angle = 0.045 * progress;
+                mat2 rotation = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+                // Rotate in logical pixels, so wide windows do not skew.
+                vec2 coords = (coords_geo.xy - vec2(0.5)) * size_geo.xy;
+                coords.y -= 70.0 * progress;
+                coords = rotation * coords / scale;
+                coords_geo.xy = coords / size_geo.xy + vec2(0.5);
+                vec2 coords_tex = (niri_geo_to_tex * coords_geo).xy;
+
+                if (any(lessThan(coords_tex, vec2(0.0))) ||
+                    any(greaterThan(coords_tex, vec2(1.0)))) {
+                    return vec4(0.0);
+                }
+                float opacity = 1.0 - smoothstep(0.15, 1.0, progress);
+                return texture2D(niri_tex, coords_tex) * opacity;
+            }
+        "
+    }
+    // Stronger bounce on windows; gentler rebound on whole-screen navigation.
+    window-movement { spring damping-ratio=0.68 stiffness=650 epsilon=0.0001; }
+    window-resize { spring damping-ratio=0.72 stiffness=700 epsilon=0.0001; }
+    horizontal-view-movement { spring damping-ratio=0.82 stiffness=650 epsilon=0.0001; }
+    workspace-switch { spring damping-ratio=0.76 stiffness=500 epsilon=0.0001; }
+    overview-open-close { spring damping-ratio=0.75 stiffness=450 epsilon=0.0001; }
+    recent-windows-close { spring damping-ratio=0.8 stiffness=650 epsilon=0.001; }
+    config-notification-open-close { spring damping-ratio=0.6 stiffness=800 epsilon=0.001; }
+    exit-confirmation-open-close { spring damping-ratio=0.65 stiffness=600 epsilon=0.001; }
+    screenshot-ui-open { duration-ms 180; curve "ease-out-cubic"; }
 }
 
+// Rules go from general to specific. Do not set global floating sizes:
+// parented dialogs and fixed-size windows already float automatically in niri.
 window-rule {
-    // Maximize tiled columns on opening; keep floating windows at a usable width.
-    open-maximized true
-    default-column-width { proportion 0.8; }
     geometry-corner-radius 10
     clip-to-geometry true
     draw-border-with-background false
 }
 
+// These normal applications should tile at half width, even if they restore
+// a maximized state. Avoid open-floating=false: their dialogs must still float.
+window-rule {
+    match app-id="^(kitty|pcmanfm|QQ|org\\.telegram\\.desktop|TelegramDesktop)$"
+    open-maximized false
+    open-maximized-to-edges false
+}
+
+// Give known wide main windows more room, without also resizing their dialogs.
+window-rule {
+    match app-id="^(com\\.obsproject\\.Studio|obs)$" title="^OBS( |$)"
+    match app-id="^steam$" title="^Steam$"
+    default-column-width { proportion 0.85; }
+}
+
+// PCManFM main windows open centered in floating, using their saved size.
+// Do not impose app-wide dimensions that would also stretch Properties dialogs.
+window-rule {
+    match app-id="^pcmanfm$"
+    open-floating true
+}
+
+// Noctalia settings are a utility, not a tiled full-height column.
 window-rule {
     match app-id="^dev\\.noctalia\\.Noctalia$"
     open-floating true
-    default-window-height { fixed 920; }
+    default-column-width { proportion 0.78; }
+    default-window-height { proportion 0.85; }
+}
+
+// Standalone settings tools. Main apps such as PCManFM/QQ stay in tiling.
+window-rule {
+    match app-id="^(org\\.pulseaudio\\.pavucontrol|pavucontrol|nm-connection-editor|blueman-manager|blueman-adapters)$"
+    match app-id="^(org\\.fcitx\\.fcitx5-config-qt|fcitx5-config-qt|qt5ct|qt6ct|nvidia-settings)$"
+    open-floating true
+    default-column-width { fixed 860; }
+    default-window-height { fixed 640; }
+}
+
+// File pickers are scoped to portal helpers, never arbitrary page titles.
+// Other parented Open/Save/Properties dialogs keep their client-chosen size.
+window-rule {
+    match app-id="^(xdg-desktop-portal-(gtk|gnome)|org\\.gnome\\.NautilusPortal)$"
+    open-floating true
+    default-column-width { proportion 0.6; }
+    default-window-height { proportion 0.7; }
+}
+
+// Authentication must be reachable, but secret prompts should not be captured.
+window-rule {
+    match app-id="^(pinentry(-.*)?|gcr-prompter|org\\.gnome\\.Gcr\\.Prompter)$"
+    open-floating true
+    open-focused true
+    block-out-from "screen-capture"
+}
+
+// Browser PiP stays in the corner without interrupting keyboard input.
+window-rule {
+    match app-id="^(zen(-beta)?|firefox|org\\.mozilla\\.firefox)$" title="^(Picture-in-Picture|画中画|画中画播放器)$"
+    open-floating true
+    open-fullscreen false
+    open-focused false
+    default-column-width { fixed 480; }
+    default-window-height { fixed 270; }
+    default-floating-position x=24 y=24 relative-to="bottom-right"
 }
 
 window-rule {
-    match title="^Picture-in-Picture$"
+    match app-id="^(org\\.telegram\\.desktop|TelegramDesktop)$" title="^(Media viewer|媒体查看器)$"
     open-floating true
+    open-fullscreen false
+    default-column-width { proportion 0.8; }
+    default-window-height { proportion 0.85; }
 }
 
 window-rule {
-    match app-id="^org\\.pulseaudio\\.pavucontrol$"
+    match app-id="^steam$" title="^(Friends List|Steam Settings|好友列表|Steam 设置)$"
     open-floating true
+    default-column-width { fixed 900; }
+    default-window-height { fixed 700; }
+}
+
+// Dynamic decoration only: is-floating is not an opening-time matcher.
+window-rule {
+    match is-floating=true
+    shadow {
+        on
+        softness 24
+        spread 1
+        offset x=0 y=5
+        color "#00000028"
+        inactive-color "#00000018"
+    }
 }
 
 binds {
@@ -121,31 +269,42 @@ binds {
     Mod+V { spawn "@noctalia@" "msg" "panel-toggle" "clipboard"; }
     Mod+S { spawn "@noctalia@" "msg" "panel-toggle" "control-center"; }
     Mod+Comma { spawn "@noctalia@" "msg" "settings-toggle"; }
-    Mod+L hotkey-overlay-title="锁屏" { spawn "@noctalia@" "msg" "session" "lock"; }
-    Mod+Q repeat=false { close-window; }
-    Mod+F repeat=false { fullscreen-window; }
-    Mod+Shift+Space repeat=false { toggle-window-floating; }
+    Mod+Alt+L hotkey-overlay-title="锁屏" { spawn "@noctalia@" "msg" "session" "lock"; }
+    // Use the normal window-close animation, without a whole-screen crossfade.
+    Mod+Q repeat=false hotkey-overlay-title="关闭窗口" { close-window; }
+    Mod+F repeat=false hotkey-overlay-title="宽度设为100%（保留间隙）" { set-window-width "100%"; }
+    Mod+M repeat=false hotkey-overlay-title="隐藏当前窗口" { spawn "@window_visibility@" "hide"; }
+    Mod+Shift+M repeat=false hotkey-overlay-title="恢复最近隐藏的窗口" { spawn "@window_visibility@" "restore"; }
+    Mod+Shift+Space repeat=false hotkey-overlay-title="缩成小窗口并浮动居中" { spawn "@window_visibility@" "compact"; }
+    Mod+Ctrl+Space repeat=false hotkey-overlay-title="放回平铺" { move-window-to-tiling; }
     Mod+Space { switch-focus-between-floating-and-tiling; }
     Mod+Tab { focus-window-previous; }
+    Mod+BackSpace hotkey-overlay-title="上一个工作区" { focus-workspace-previous; }
     Mod+O repeat=false hotkey-overlay-title="工作区总览" { toggle-overview; }
     Mod+Grave repeat=false { toggle-overview; }
     Mod+Shift+Slash { show-hotkey-overlay; }
+    // This captures all keys, including secrets: turn it off before password entry.
+    Mod+Alt+K repeat=false hotkey-overlay-title="按键显示开关（输入密码前关闭）" { spawn "@key_display@"; }
     Mod+Shift+E repeat=false { quit; }
     Ctrl+Alt+Delete repeat=false { quit; }
 
-    // Columns scroll horizontally; windows in a column stack vertically.
-    Mod+Left { focus-column-or-monitor-left; }
-    Mod+Right { focus-column-or-monitor-right; }
-    Mod+Up { focus-window-up; }
-    Mod+Down { focus-window-down; }
-    Mod+Shift+Left { move-column-left; }
-    Mod+Shift+Right { move-column-right; }
-    Mod+Shift+Up { move-window-up; }
-    Mod+Shift+Down { move-window-down; }
-    Mod+Ctrl+Left { focus-monitor-left; }
-    Mod+Ctrl+Right { focus-monitor-right; }
-    Mod+Ctrl+Shift+Left { move-column-to-monitor-left; }
-    Mod+Ctrl+Shift+Right { move-column-to-monitor-right; }
+    // Vim directions: H left, J down, K up, L right.
+    Mod+H { focus-column-or-monitor-left; }
+    Mod+J { focus-window-down; }
+    Mod+K { focus-window-up; }
+    Mod+L { focus-column-or-monitor-right; }
+    Mod+Shift+H { move-column-left; }
+    Mod+Shift+J { move-window-down; }
+    Mod+Shift+K { move-window-up; }
+    Mod+Shift+L { move-column-right; }
+    Mod+Ctrl+H { focus-monitor-left; }
+    Mod+Ctrl+J { focus-monitor-down; }
+    Mod+Ctrl+K { focus-monitor-up; }
+    Mod+Ctrl+L { focus-monitor-right; }
+    Mod+Ctrl+Shift+H { move-column-to-monitor-left; }
+    Mod+Ctrl+Shift+J { move-column-to-monitor-down; }
+    Mod+Ctrl+Shift+K { move-column-to-monitor-up; }
+    Mod+Ctrl+Shift+L { move-column-to-monitor-right; }
     Mod+Page_Up { focus-workspace-up; }
     Mod+Page_Down { focus-workspace-down; }
     Mod+Shift+Page_Up { move-window-to-workspace-up; }
@@ -172,15 +331,21 @@ binds {
     Mod+Shift+8 { move-window-to-workspace 8; }
     Mod+Shift+9 { move-window-to-workspace 9; }
 
-    Mod+R hotkey-overlay-title="切换列宽" { switch-preset-column-width; }
-    Mod+Shift+F { maximize-column; }
-    Mod+C { center-column; }
+    // Window-width actions work for floating windows as well as tiled columns.
+    Mod+R hotkey-overlay-title="切换宽度：1/3、2/3、100%" { switch-preset-window-width; }
+    Mod+Ctrl+R hotkey-overlay-title="切换窗口高度" { switch-preset-window-height; }
+    Mod+Shift+F repeat=false hotkey-overlay-title="全屏 / 退出全屏" { fullscreen-window; }
+    Mod+Ctrl+F hotkey-overlay-title="扩展到当前可用宽度" { expand-column-to-available-width; }
+    Mod+C hotkey-overlay-title="居中窗口" { center-window; }
+    Mod+Shift+C hotkey-overlay-title="居中所有可见列" { center-visible-columns; }
+    Mod+T repeat=false hotkey-overlay-title="列内标签页 / 上下平铺" { toggle-column-tabbed-display; }
     Mod+BracketLeft { consume-or-expel-window-left; }
     Mod+BracketRight { consume-or-expel-window-right; }
-    Mod+Minus { set-column-width "-10%"; }
-    Mod+Equal { set-column-width "+10%"; }
+    Mod+Minus { set-window-width "-10%"; }
+    Mod+Equal { set-window-width "+10%"; }
     Mod+Ctrl+Minus { set-window-height "-10%"; }
     Mod+Ctrl+Equal { set-window-height "+10%"; }
+    Mod+Ctrl+0 hotkey-overlay-title="恢复自动窗口高度" { reset-window-height; }
 
     // Native screenshots work without the wlroots-only screencopy protocol.
     Print { screenshot; }

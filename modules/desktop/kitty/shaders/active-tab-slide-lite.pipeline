@@ -1,0 +1,5 @@
+# Frames are requested by Python only during a tab transition.
+startgroup
+    animation_step 0
+    shaders active-tab-slide-lite
+endgroup

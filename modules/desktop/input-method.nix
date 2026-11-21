@@ -1,14 +1,15 @@
 {
   flake.modules.nixos.input-method =
     {
-      config,
       identity,
+      lib,
       pkgs,
       ...
     }:
     let
       theme = import ../../lib/theme.nix;
       fcitxTheme = pkgs.callPackage ../../overlays/fcitx5-deepinlike-theme { };
+      configFile = import ../../lib/maid-config-file.nix { inherit pkgs; };
     in
     {
       i18n.inputMethod = {
@@ -24,25 +25,6 @@
               ];
             })
           ];
-          settings = {
-            inputMethod = {
-              "Groups/0" = {
-                Name = "Default";
-                "Default Layout" = "us";
-                DefaultIM = "keyboard-us";
-              };
-              "Groups/0/Items/0".Name = "keyboard-us";
-              "Groups/0/Items/1".Name = "rime";
-              GroupOrder."0" = "Default";
-            };
-            addons.classicui.globalSection = {
-              Theme = theme.fcitxName;
-              DarkTheme = "deepinExp-dark";
-              UseDarkTheme = false;
-              UseAccentColor = false;
-              Font = "${theme.fonts.sans} ${toString theme.fonts.size}";
-            };
-          };
         };
       };
 
@@ -55,16 +37,47 @@
       environment.systemPackages = [ fcitxTheme ];
       environment.pathsToLink = [ "/share/fcitx5" ];
 
-      users.users.${identity.username}.maid = {
-        file.xdg_data."fcitx5/rime/default.custom.yaml".text = ''
-          patch:
-            __include: wanxiang_suggested_default:/
-        '';
-        # A user config wins over /etc/xdg; replace old plasma theme overrides.
-        # Rime's dictionaries and runtime data remain writable.
-        file.xdg_config."fcitx5/conf/classicui.conf" = {
-          text = config.environment.etc."xdg/fcitx5/conf/classicui.conf".text;
-        };
-      };
+      # NixOS supplies the daemon/addons only. User settings belong to nix-maid,
+      # not a second /etc/xdg configuration shadowed by Fcitx's saved profile.
+      users.users.${identity.username}.maid = lib.mkMerge [
+        {
+          file.xdg_data."fcitx5/rime/default.custom.yaml".text = ''
+            patch:
+              __include: wanxiang_suggested_default:/
+          '';
+          # Fcitx's Keyboard engine otherwise consumes Ctrl+Alt+H/J before
+          # Wayland clients (including Kitty) receive the key press.
+          file.xdg_config."fcitx5/conf/keyboard.conf".text = lib.generators.toINI { } {
+            "Hint Trigger"."0" = "Control+Alt+Shift+H";
+            "One Time Hint Trigger"."0" = "Control+Alt+Shift+J";
+          };
+          file.xdg_config."fcitx5/conf/classicui.conf".text = lib.generators.toINIWithGlobalSection { } {
+            globalSection = {
+              Theme = theme.fcitxName;
+              DarkTheme = "deepinExp-dark";
+              UseDarkTheme = "False";
+              UseAccentColor = "False";
+              Font = "${theme.fonts.sans} ${toString theme.fonts.size}";
+            };
+            sections = { };
+          };
+        }
+        (configFile {
+          path = "fcitx5/profile";
+          # Fcitx saves the active input method. Track defaults without making
+          # the running daemon write into the Nix store or freezing its state.
+          writable = true;
+          text = lib.generators.toINI { } {
+            "Groups/0" = {
+              Name = "Default";
+              "Default Layout" = "us";
+              DefaultIM = "rime";
+            };
+            "Groups/0/Items/0".Name = "keyboard-us";
+            "Groups/0/Items/1".Name = "rime";
+            GroupOrder."0" = "Default";
+          };
+        })
+      ];
     };
 }

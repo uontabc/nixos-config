@@ -3,7 +3,6 @@
     {
       config,
       identity,
-      lib,
       pkgs,
       ...
     }:
@@ -63,24 +62,9 @@
       '';
     in
     {
-      programs.dconf = {
-        enable = true;
-        profiles.user.databases = [
-          {
-            # Keep fonts/icons/cursor fixed; Noctalia may select the GTK theme.
-            lockAll = true;
-            settings."org/gnome/desktop/interface" = {
-              color-scheme = "prefer-light";
-              icon-theme = theme.icons;
-              cursor-theme = theme.cursorName;
-              cursor-size = lib.gvariant.mkInt32 theme.cursorSize;
-              font-name = "${theme.fonts.sans} ${toString theme.fonts.size}";
-              document-font-name = "${theme.fonts.sans} ${toString theme.fonts.size}";
-              monospace-font-name = "${theme.fonts.mono} ${toString theme.fonts.size}";
-            };
-          }
-        ];
-      };
+      # NixOS provides D-Bus support; nix-maid owns the per-user settings below.
+      # Do not lock the same keys in a system dconf database as well.
+      programs.dconf.enable = true;
       qt = {
         enable = true;
         platformTheme = "qt5ct";
@@ -98,6 +82,15 @@
         XCURSOR_SIZE = toString theme.cursorSize;
       };
       users.users.${identity.username}.maid = {
+        gsettings.settings.org.gnome.desktop.interface = {
+          color-scheme = "prefer-light";
+          icon-theme = theme.icons;
+          cursor-theme = theme.cursorName;
+          cursor-size = theme.cursorSize;
+          font-name = "${theme.fonts.sans} ${toString theme.fonts.size}";
+          document-font-name = "${theme.fonts.sans} ${toString theme.fonts.size}";
+          monospace-font-name = "${theme.fonts.mono} ${toString theme.fonts.size}";
+        };
         # Legacy Xcursor users and clients that request the "default" theme.
         file.home.".icons/default/index.theme".text = cursorSettings;
         # GTK 2 does not read gtk-3.0/settings.ini (some game launchers still use it).
